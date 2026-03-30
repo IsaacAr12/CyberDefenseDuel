@@ -1,5 +1,8 @@
 package game;
 
+//Este asunto sencillamente es un ataque
+//Tiene inf de daño, tipo, velocidad, y posición
+// Al tener valores en x e y, podemos hacer cosas chistosas
 public class Attack {
     private final String type;
     private final int damage;
@@ -13,11 +16,14 @@ public class Attack {
         this.x = startX;
         this.y = startY;
     }
-
+    //Actualiza la posición del ataque en función del tiempo transcurrido.
+    //Se asume que el ataque se mueve verticalmente en el eje Y, aunque podría 
+    //cambiar esto mas adelante
     public void update(double delta) {
         this.y += speed * delta;
     }
-
+    //Determina si el ataque está en el rango efectivo de
+    //impacto de jugador.
     public boolean isInRange(Player p) {
         return Math.abs(this.x - p.getX()) < 10 && this.y >= p.getY();
     }

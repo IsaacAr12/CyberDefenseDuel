@@ -50,6 +50,6 @@ public class GameEngine {
     }
 
     public void applyRemoteState(GameState gs) {
-        // Aquí podrías mostrar el estado del oponente en la GUI
+        // Aquí se podría mostrar el estado de oponente ya en GUI
     }
 }
