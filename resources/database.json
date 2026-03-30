@@ -1,28 +1,3 @@
 {
-  "users": [
-    {
-      "username": "Jere",
-      "password": "1234",
-      "avatar": "",
-      "stats": {
-        "totalScore": 0,
-        "gamesPlayed": 0,
-        "networkXp": 0,
-        "malwareXp": 0,
-        "cryptoXp": 0
-      }
-    },
-    {
-      "username": "Isaac",
-      "password": "1234",
-      "avatar": "",
-      "stats": {
-        "totalScore": 0,
-        "gamesPlayed": 0,
-        "networkXp": 0,
-        "malwareXp": 0,
-        "cryptoXp": 0
-      }
-    }
-  ]
+  "users": []
 }
