@@ -8,10 +8,12 @@ public class Server {
 
     private final int port;
     private final DatabaseManager databaseManager;
+    private final MatchManager matchManager;
 
     public Server(int port) {
         this.port = port;
         this.databaseManager = new DatabaseManager("resources/database.json");
+        this.matchManager = new MatchManager();
     }
 
     public void start() {
@@ -24,7 +26,9 @@ public class Server {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Cliente conectado desde: " + clientSocket.getInetAddress());
 
-                ClientHandler clientHandler = new ClientHandler(clientSocket, databaseManager);
+                ClientHandler clientHandler =
+                        new ClientHandler(clientSocket, databaseManager, matchManager);
+
                 Thread clientThread = new Thread(clientHandler);
                 clientThread.start();
             }
