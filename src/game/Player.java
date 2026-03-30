@@ -1,27 +1,46 @@
 package game;
 
 public class Player {
-    private String playerId;
+    private final String playerId;
     private int hp;
-    private int x;
-    private String avatar;
+    private double x;
+    private final String avatar;
 
-    public Player(String id, int hp, String avatar) {
-        this.playerId = id;
-        this.hp = hp;
+    public Player(String playerId, int initialHp, String avatar) {
+        this.playerId = playerId;
+        this.hp = initialHp;
         this.avatar = avatar;
-        this.x = 0;
-    }
-
-    public void moveLeft() { x -= 5; }
-    public void moveRight() { x += 5; }
-    public void applyDamage(int d) { hp -= d; }
-    public boolean defend(String defenseType, Attack attack) {
-        return defenseType.equalsIgnoreCase(attack.getType());
+        this.x = 0.0;
     }
 
     public String getPlayerId() { return playerId; }
     public int getHp() { return hp; }
-    public int getX() { return x; }
+    public void setHp(int hp) { this.hp = hp; }
+
+    public double getX() { return x; }
+    public void setX(double x) { this.x = x; }
+
     public String getAvatar() { return avatar; }
+
+    public void moveLeft(double delta, double speed) {
+        this.x -= speed * delta;
+    }
+
+    public void moveRight(double delta, double speed) {
+        this.x += speed * delta;
+    }
+
+    public void applyDamage(int d) {
+        this.hp -= d;
+        if (this.hp < 0) this.hp = 0;
+    }
+
+    
+     //Comprueba si la defensa elegida neutraliza el ataque.
+     // Retorna true si la defensa coincide con el tipo de ataque
+     
+    public boolean defend(String defenseType, Attack attack) {
+        if (defenseType == null || attack == null) return false;
+        return defenseType.equalsIgnoreCase(attack.getType());
+    }
 }
