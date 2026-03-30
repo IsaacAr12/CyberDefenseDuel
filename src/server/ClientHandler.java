@@ -15,6 +15,7 @@ public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private final DatabaseManager databaseManager;
+    private String authenticatedUsername;
     private final Gson gson;
 
     private BufferedReader in;
@@ -84,19 +85,24 @@ public class ClientHandler implements Runnable {
             return new Message(MessageType.REGISTER_FAIL, "El usuario ya existe");
         }
     }
+    
 
     private Message handleLogin(Message request) {
-        if (isBlank(request.getUsername()) || isBlank(request.getPassword())) {
-            return new Message(MessageType.LOGIN_FAIL, "Username y password son obligatorios");
-        }
+    if (isBlank(request.getUsername()) || isBlank(request.getPassword())) {
+        return new Message(MessageType.LOGIN_FAIL, "Username y password son obligatorios");
+    }
 
-        boolean success = databaseManager.loginUser(request.getUsername(), request.getPassword());
+    boolean success = databaseManager.loginUser(request.getUsername(), request.getPassword());
 
-        if (success) {
-            return new Message(MessageType.LOGIN_OK, "Login correcto");
-        } else {
-            return new Message(MessageType.LOGIN_FAIL, "Credenciales inválidas");
-        }
+    if (success) {
+        this.authenticatedUsername = request.getUsername();
+
+        System.out.println("Usuario autenticado: " + authenticatedUsername);
+
+        return new Message(MessageType.LOGIN_OK, "Login correcto");
+    } else {
+        return new Message(MessageType.LOGIN_FAIL, "Credenciales inválidas");
+    }
     }
 
     private boolean isBlank(String value) {
@@ -123,4 +129,12 @@ public class ClientHandler implements Runnable {
             System.out.println("Error cerrando conexión: " + e.getMessage());
         }
     }
+    public boolean isAuthenticated() {
+    return authenticatedUsername != null;
+    }
+
+    public String getAuthenticatedUsername() {
+        return authenticatedUsername;
+    }
 }
+
