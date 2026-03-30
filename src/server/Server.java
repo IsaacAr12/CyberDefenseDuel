@@ -7,9 +7,11 @@ import java.net.Socket;
 public class Server {
 
     private final int port;
+    private final DatabaseManager databaseManager;
 
     public Server(int port) {
         this.port = port;
+        this.databaseManager = new DatabaseManager("resources/database.json");
     }
 
     public void start() {
@@ -22,7 +24,7 @@ public class Server {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Cliente conectado desde: " + clientSocket.getInetAddress());
 
-                ClientHandler clientHandler = new ClientHandler(clientSocket);
+                ClientHandler clientHandler = new ClientHandler(clientSocket, databaseManager);
                 Thread clientThread = new Thread(clientHandler);
                 clientThread.start();
             }
