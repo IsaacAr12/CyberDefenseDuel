@@ -88,11 +88,11 @@ public class ClientHandler implements Runnable {
     }
 
     private Message handleRegister(Message request) {
-        if (isBlank(request.getUsername()) || isBlank(request.getPassword())) {
+        if (isBlank(request.getUsername()) || isBlank(request.getPasswordHash())) {
             return new Message(MessageType.REGISTER_FAIL, "Username y password son obligatorios");
         }
 
-        boolean registered = databaseManager.registerUser(request.getUsername(), request.getPassword());
+        boolean registered = databaseManager.registerUser(request.getUsername(), request.getPasswordHash());
 
         if (registered) {
             return new Message(MessageType.REGISTER_OK, "Usuario registrado correctamente");
@@ -102,11 +102,11 @@ public class ClientHandler implements Runnable {
     }
 
     private Message handleLogin(Message request) {
-        if (isBlank(request.getUsername()) || isBlank(request.getPassword())) {
+        if (isBlank(request.getUsername()) || isBlank(request.getPasswordHash())) {
             return new Message(MessageType.LOGIN_FAIL, "Username y password son obligatorios");
         }
 
-        boolean success = databaseManager.loginUser(request.getUsername(), request.getPassword());
+        boolean success = databaseManager.loginUser(request.getUsername(), request.getPasswordHash());
 
         if (success) {
             this.authenticatedUsername = request.getUsername();

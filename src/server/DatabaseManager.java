@@ -102,7 +102,7 @@ public class DatabaseManager {
 
         for (User user : db.getUsers()) {
             if (user.getUsername().equalsIgnoreCase(username)
-                    && user.getPassword().equals(password)) {
+                    && user.getPasswordHash().equals(password)) {
                 return true;
             }
         }
