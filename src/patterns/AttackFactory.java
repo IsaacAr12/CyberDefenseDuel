@@ -1,8 +1,8 @@
 package patterns;
 
-/**
- * Esto es un Factory method para crear ataques por tipo, DDOS o los otros que ya no recuerdo como se llaman.
- */
+import game.Attack;
+
 public interface AttackFactory {
-    AttackPrototype createAttack(String type);
+    Attack createAttack(String type);
+    Attack createAttack(String type, int damage, double x, double y);
 }

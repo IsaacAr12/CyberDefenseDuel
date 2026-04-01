@@ -13,100 +13,100 @@ import java.nio.file.Paths;
 
 public class DatabaseManager {
 
-    private static class Database {
-        private User[] users;
-
-        public Database() {
-            this.users = new User[0];
-        }
-
-        public User[] getUsers() {
-            return users;
-        }
-
-        public void setUsers(User[] users) {
-            this.users = users;
-        }
-    }
-
     private final Path dbPath;
     private final Gson gson;
+    private User[] users;
+
+    public DatabaseManager() {
+        this("database.json");
+    }
 
     public DatabaseManager(String filePath) {
         this.dbPath = Paths.get(filePath);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
-        initializeDatabase();
+        this.users = new User[0];
+        loadDatabase();
     }
 
-    private void initializeDatabase() {
+    private void loadDatabase() {
         try {
             if (!Files.exists(dbPath)) {
-                if (dbPath.getParent() != null) {
-                    Files.createDirectories(dbPath.getParent());
+                saveDatabase();
+                return;
+            }
+
+            try (Reader reader = Files.newBufferedReader(dbPath)) {
+                User[] loadedUsers = gson.fromJson(reader, User[].class);
+                if (loadedUsers != null) {
+                    users = loadedUsers;
+                } else {
+                    users = new User[0];
                 }
-                saveDatabase(new Database());
             }
         } catch (IOException e) {
-            System.out.println("Error inicializando database.json: " + e.getMessage());
+            users = new User[0];
+            System.out.println("No se pudo leer database.json: " + e.getMessage());
         }
     }
 
-    private Database loadDatabase() {
-        try (Reader reader = Files.newBufferedReader(dbPath)) {
-            Database db = gson.fromJson(reader, Database.class);
-            if (db == null || db.getUsers() == null) {
-                return new Database();
-            }
-            return db;
-        } catch (IOException e) {
-            System.out.println("Error leyendo database.json: " + e.getMessage());
-            return new Database();
-        }
-    }
-
-    private void saveDatabase(Database db) {
+    private void saveDatabase() {
         try (Writer writer = Files.newBufferedWriter(dbPath)) {
-            gson.toJson(db, writer);
+            gson.toJson(users, writer);
         } catch (IOException e) {
-            System.out.println("Error guardando database.json: " + e.getMessage());
+            System.out.println("No se pudo guardar database.json: " + e.getMessage());
         }
     }
 
-    public synchronized boolean registerUser(String username, String password) {
-        Database db = loadDatabase();
+    public boolean registerUser(String username, String password) {
+        return registerUser(username, password, "Captain Firewall");
+    }
 
-        for (User user : db.getUsers()) {
-            if (user.getUsername().equalsIgnoreCase(username)) {
-                return false;
-            }
+    public boolean registerUser(String username, String password, String avatar) {
+        if (findUser(username) != null) {
+            return false;
         }
 
-        User newUser = new User(username, password);
-
-        User[] oldUsers = db.getUsers();
-        User[] newUsers = new User[oldUsers.length + 1];
-
-        for (int i = 0; i < oldUsers.length; i++) {
-            newUsers[i] = oldUsers[i];
-        }
-
-        newUsers[oldUsers.length] = newUser;
-        db.setUsers(newUsers);
-        saveDatabase(db);
-
+        User newUser = new User(username, password, avatar);
+        addUser(newUser);
+        saveDatabase();
         return true;
     }
 
-    public synchronized boolean loginUser(String username, String password) {
-        Database db = loadDatabase();
+    public boolean loginUser(String username, String password) {
+        User user = findUser(username);
+        return user != null && user.getPassword().equals(password);
+    }
 
-        for (User user : db.getUsers()) {
-            if (user.getUsername().equalsIgnoreCase(username)
-                    && user.getPasswordHash().equals(password)) {
-                return true;
+    public User findUser(String username) {
+        for (User user : users) {
+            if (user != null && user.getUsername().equals(username)) {
+                return user;
             }
         }
+        return null;
+    }
 
-        return false;
+    public boolean updateAvatar(String username, String avatar) {
+        User user = findUser(username);
+        if (user == null) {
+            return false;
+        }
+
+        user.setAvatar(avatar);
+        saveDatabase();
+        return true;
+    }
+
+    public User[] getUsers() {
+        return users;
+    }
+
+    private void addUser(User user) {
+        User[] newUsers = new User[users.length + 1];
+        for (int i = 0; i < users.length; i++) {
+            newUsers[i] = users[i];
+        }
+        newUsers[users.length] = user;
+        users = newUsers;
     }
 }

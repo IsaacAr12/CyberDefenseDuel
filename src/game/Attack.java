@@ -1,54 +1,124 @@
 package game;
 
-import java.util.UUID;
-//Este asunto sencillamente es un ataque
-//Tiene inf de daño, tipo, velocidad, y posición
-// Al tener valores en x e y, podemos hacer cosas chistosas
 public class Attack {
-    private final String id;
-    private final String type;
-    private final int damage;
-    private final double baseSpeed;
+    private String id;
+    private String type;
+    private int damage;
+    private double baseSpeed;
     private double x;
     private double y;
 
-    public Attack(String type, int damage, double baseSpeed, double startX, double startY) {
-        this.id = UUID.randomUUID().toString();
+    public Attack(String type, int damage, double baseSpeed, double x, double y) {
+        this.id = type + "_" + System.nanoTime();
         this.type = type;
         this.damage = damage;
         this.baseSpeed = baseSpeed;
-        this.x = startX;
-        this.y = startY;
+        this.x = x;
+        this.y = y;
     }
 
-    public String getId() { return id; }
-    public String getType() { return type; }
-    public int getDamage() { return damage; }
-    public double getBaseSpeed() { return baseSpeed; }
+    public Attack(String id, String type, double x, double y, double baseSpeed, int damage) {
+        this.id = id;
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.baseSpeed = baseSpeed;
+        this.damage = damage;
+    }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public void update(double delta) {
+        y += baseSpeed * delta;
+    }
 
-    
-     //Actualiza la posición vertical del ataque.
-     // delta segundos transcurridos desde el último frame
-     // speedMultiplier es multiplicador (por nivel) aplicado a la velocidad
-    
     public void update(double delta, double speedMultiplier) {
-        double speed = baseSpeed + speedMultiplier;
-        this.y += speed * delta;
+        y += (baseSpeed * speedMultiplier) * delta;
     }
 
-    
-     //Verifica colisión simple con el jugador (umbral rectangular).
-     
-    public boolean isInRange(Player p, double thresholdX, double thresholdY) {
-        double dx = Math.abs(this.x - p.getX());
-        double dy = Math.abs(this.y - p.getY());
-        return dx <= thresholdX && dy <= thresholdY;
+    public boolean isInRange(Player player) {
+        return isInRange(player, 40.0, 40.0);
     }
 
-    public void setPosition(double x, double y) { this.x = x; this.y = y; }
+    public boolean isInRange(Player player, double thresholdX, double thresholdY) {
+        if (player == null) {
+            return false;
+        }
+
+        double playerX = tryGetPlayerX(player);
+        double playerY = tryGetPlayerY(player);
+
+        return Math.abs(this.x - playerX) <= thresholdX
+                && Math.abs(this.y - playerY) <= thresholdY;
+    }
+
+    private double tryGetPlayerX(Player player) {
+        try {
+            return ((Number) player.getClass().getMethod("getX").invoke(player)).doubleValue();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    private double tryGetPlayerY(Player player) {
+        try {
+            return ((Number) player.getClass().getMethod("getY").invoke(player)).doubleValue();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public double getBaseSpeed() {
+        return baseSpeed;
+    }
+
+    public double getSpeed() {
+        return baseSpeed;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+
+    public void setBaseSpeed(double baseSpeed) {
+        this.baseSpeed = baseSpeed;
+    }
+
+    public void setSpeed(double speed) {
+        this.baseSpeed = speed;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
 }
-
-
