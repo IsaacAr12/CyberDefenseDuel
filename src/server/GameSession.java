@@ -1,91 +1,52 @@
 package server;
 
-import com.google.gson.Gson;
 import network.Message;
 import network.MessageType;
 
+import java.util.Random;
+
 public class GameSession {
 
-    private final String sessionId;
     private final ClientHandler playerA;
     private final ClientHandler playerB;
-    private final Gson gson;
 
-    private boolean playerAFinished;
-    private boolean playerBFinished;
+    private String mapA;
+    private String mapB;
 
-    public GameSession(String sessionId, ClientHandler playerA, ClientHandler playerB) {
-        this.sessionId = sessionId;
+    public GameSession(ClientHandler playerA, ClientHandler playerB) {
         this.playerA = playerA;
         this.playerB = playerB;
-        this.gson = new Gson();
-        this.playerAFinished = false;
-        this.playerBFinished = false;
     }
 
     public void start() {
-        System.out.println("Iniciando sesión: " + sessionId);
-
-        sendMatchFound(playerA, playerB.getAuthenticatedUsername());
-        sendMatchFound(playerB, playerA.getAuthenticatedUsername());
-
-        sendConfig(playerA);
-        sendConfig(playerB);
+        sendToBoth(new Message(MessageType.MATCH_FOUND, "SERVER", ""));
     }
 
-    private void sendMatchFound(ClientHandler player, String opponentUsername) {
-        String json = """
-        {
-          "type":"MATCH_FOUND",
-          "opponent":"%s",
-          "sessionId":"%s"
-        }
-        """.formatted(opponentUsername, sessionId).trim();
-
-        player.sendRawMessage(json);
-    }
-
-    private void sendConfig(ClientHandler player) {
-        String json = """
-        {
-          "type":"CONFIG",
-          "initialHp":100,
-          "baseSpawnRate":1.0,
-          "baseAttackSpeed":2.0,
-          "scorePerKill":10,
-          "difficultyStepScore":100,
-          "spawnMultiplierPerLevel":1.15,
-          "speedAddPerLevel":0.3,
-          "damageByType":{"DDOS":5,"MALWARE":8,"CRED":10}
-        }
-        """.trim();
-
-        player.sendRawMessage(json);
-    }
-
-    public synchronized void forwardGameState(ClientHandler sender, String jsonState) {
+    public synchronized void receiveMapChoice(ClientHandler sender, String mapName) {
         if (sender == playerA) {
-            playerB.sendRawMessage(jsonState);
+            mapA = mapName;
         } else if (sender == playerB) {
-            playerA.sendRawMessage(jsonState);
+            mapB = mapName;
+        }
+
+        if (mapA != null && mapB != null) {
+            String finalMap = new Random().nextBoolean() ? mapA : mapB;
+            sendToBoth(new Message(MessageType.MAP_SELECTED, "SERVER", finalMap));
         }
     }
 
-    public synchronized void handleGameOver(ClientHandler sender, String jsonGameOver) {
-        if (sender == playerA) {
-            playerAFinished = true;
-            playerB.sendRawMessage(jsonGameOver);
-        } else if (sender == playerB) {
-            playerBFinished = true;
-            playerA.sendRawMessage(jsonGameOver);
-        }
-
-        if (playerAFinished && playerBFinished) {
-            System.out.println("Sesión finalizada: " + sessionId);
-        }
+    public void relayGameState(ClientHandler sender, String payload) {
+        ClientHandler target = (sender == playerA) ? playerB : playerA;
+        target.sendMessage(new Message(MessageType.GAME_STATE, sender.getUsername(), payload));
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public void handleGameOver(ClientHandler sender, String payload) {
+        ClientHandler target = (sender == playerA) ? playerB : playerA;
+        target.sendMessage(new Message(MessageType.GAME_OVER, sender.getUsername(), payload));
+    }
+
+    private void sendToBoth(Message msg) {
+        playerA.sendMessage(msg);
+        playerB.sendMessage(msg);
     }
 }

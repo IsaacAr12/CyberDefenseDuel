@@ -1,65 +1,73 @@
 package client;
 
-import com.google.gson.Gson;
 import network.Message;
-import network.MessageType;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class GameClient {
 
-    public static void main(String[] args) {
-        String host = "localhost";
-        int port = 5000;
-        Gson gson = new Gson();
+    private Socket socket;
+    private BufferedReader in;
+    private BufferedWriter out;
 
-        try (
-            Socket socket = new Socket(host, port);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            Scanner scanner = new Scanner(System.in)
-        ) {
-            System.out.println("Conectado al servidor.");
-            System.out.println("1 = REGISTER");
-            System.out.println("2 = LOGIN");
-            System.out.print("Elige opción: ");
-            String option = scanner.nextLine();
+    private MessageListener listener;
 
-            System.out.print("Username: ");
-            String username = scanner.nextLine();
+    public void connect(String host, int port) throws IOException {
+        socket = new Socket(host, port);
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-            System.out.print("Password: ");
-            String password = scanner.nextLine();
-
-            Message request;
-
-            if ("1".equals(option)) {
-                request = new Message(MessageType.REGISTER, username, password);
-            } else {
-                request = new Message(MessageType.LOGIN, username, password);
+        Thread receiver = new Thread(() -> {
+            try {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (listener != null) {
+                        listener.onMessage(Message.fromJson(line));
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Conexión cerrada.");
             }
+        });
 
-            String jsonRequest = gson.toJson(request);
-            out.write(jsonRequest);
+        receiver.setDaemon(true);
+        receiver.start();
+    }
+
+    public void disconnect() {
+        try {
+            if (in != null) in.close();
+        } catch (Exception ignored) {}
+
+        try {
+            if (out != null) out.close();
+        } catch (Exception ignored) {}
+
+        try {
+            if (socket != null) socket.close();
+        } catch (Exception ignored) {}
+    }
+
+    public void sendMessage(Message msg) {
+        try {
+            out.write(msg.toJson());
             out.newLine();
             out.flush();
-
-            String jsonResponse = in.readLine();
-            Message response = gson.fromJson(jsonResponse, Message.class);
-
-            System.out.println("Respuesta del servidor:");
-            System.out.println("Tipo: " + response.getType());
-            System.out.println("Mensaje: " + response.getMessage());
-
         } catch (IOException e) {
-            System.out.println("Error del cliente: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void setListener(MessageListener listener) {
+        this.listener = listener;
+    }
+
+    public interface MessageListener {
+        void onMessage(Message message);
     }
 }
