@@ -54,4 +54,24 @@ public class PlayerStats {
     public void setCryptoXp(int cryptoXp) {
         this.cryptoXp = cryptoXp;
     }
+
+    public void addTotalScore(int amount) {
+        this.totalScore += amount;
+    }
+
+    public void addGamePlayed() {
+        this.gamesPlayed++;
+    }
+
+    public void addNetworkXp(int amount) {
+        this.networkXp += amount;
+    }
+
+    public void addMalwareXp(int amount) {
+        this.malwareXp += amount;
+    }
+
+    public void addCryptoXp(int amount) {
+        this.cryptoXp += amount;
+    }
 }

@@ -15,12 +15,14 @@ public class GameSession {
 
     private boolean gameOverA;
     private boolean gameOverB;
+    private boolean sessionClosed;
 
     public GameSession(ClientHandler playerA, ClientHandler playerB) {
         this.playerA = playerA;
         this.playerB = playerB;
         this.gameOverA = false;
         this.gameOverB = false;
+        this.sessionClosed = false;
     }
 
     public void start() {
@@ -28,6 +30,10 @@ public class GameSession {
     }
 
     public synchronized void receiveMapChoice(ClientHandler sender, String mapName) {
+        if (sessionClosed) {
+            return;
+        }
+
         if (sender == playerA) {
             mapA = mapName;
         } else if (sender == playerB) {
@@ -40,12 +46,20 @@ public class GameSession {
         }
     }
 
-    public void relayGameState(ClientHandler sender, String payload) {
+    public synchronized void relayGameState(ClientHandler sender, String payload) {
+        if (sessionClosed) {
+            return;
+        }
+
         ClientHandler target = (sender == playerA) ? playerB : playerA;
         target.sendMessage(new Message(MessageType.GAME_STATE, sender.getUsername(), payload));
     }
 
     public synchronized void handleGameOver(ClientHandler sender, String payload) {
+        if (sessionClosed) {
+            return;
+        }
+
         if (sender == playerA) {
             gameOverA = true;
         } else if (sender == playerB) {
@@ -56,8 +70,13 @@ public class GameSession {
         target.sendMessage(new Message(MessageType.GAME_OVER, sender.getUsername(), payload));
 
         if (gameOverA && gameOverB) {
+            sessionClosed = true;
             sendToBoth(new Message(MessageType.ERROR, "SERVER", "SESSION_FINISHED"));
         }
+    }
+
+    public boolean isSessionClosed() {
+        return sessionClosed;
     }
 
     private void sendToBoth(Message msg) {

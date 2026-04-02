@@ -54,6 +54,11 @@ public class GUIManager implements ClientController.GUIBridge {
         stage.setScene(currentGameScene.createScene());
     }
 
+    public void showFinalResultScene() {
+        FinalResultScene scene = new FinalResultScene(this);
+        stage.setScene(scene.createScene());
+    }
+
     public void setLoginStatusLabel(Label loginStatusLabel) {
         this.loginStatusLabel = loginStatusLabel;
     }
@@ -112,5 +117,10 @@ public class GUIManager implements ClientController.GUIBridge {
         if (currentGameScene != null) {
             currentGameScene.handleOpponentGameOver(payload);
         }
+    }
+
+    @Override
+    public void onSessionFinished() {
+        showFinalResultScene();
     }
 }

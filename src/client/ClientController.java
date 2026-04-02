@@ -87,6 +87,8 @@ public class ClientController {
                 case ERROR -> {
                     if ("WAITING".equalsIgnoreCase(msg.getPayload())) {
                         guiBridge.showWaitingStatus();
+                    } else if ("SESSION_FINISHED".equalsIgnoreCase(msg.getPayload())) {
+                        guiBridge.onSessionFinished();
                     }
                 }
                 default -> {
@@ -103,6 +105,7 @@ public class ClientController {
         void onMapSelected(String mapName);
         void onOpponentState(String payload);
         void onOpponentGameOver(String payload);
+        void onSessionFinished();
     }
 
     private static class Credentials {

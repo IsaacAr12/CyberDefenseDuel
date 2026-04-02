@@ -43,11 +43,15 @@ public class GameScene {
     private final Random random = new Random();
     private double spawnTimer = 0;
 
+    private boolean localGameOver = false;
+    private boolean opponentGameOver = false;
+
     private Label hpLabel;
     private Label scoreLabel;
     private Label laneLabel;
     private Label levelLabel;
     private Label opponentLabel;
+    private Label centerStatusLabel;
 
     public GameScene(GUIManager guiManager, ClientController controller, String mapName) {
         this.guiManager = guiManager;
@@ -80,15 +84,23 @@ public class GameScene {
         HBox top = new HBox(18, hpLabel, scoreLabel, laneLabel, levelLabel, mapLabel, opponentLabel);
         top.setAlignment(Pos.CENTER);
         top.setStyle("-fx-padding: 12;");
-
         root.setTop(top);
 
-        Canvas canvas = new Canvas(width, height - 60);
-        root.setCenter(canvas);
+        Canvas canvas = new Canvas(width, height - 100);
+
+        centerStatusLabel = new Label("");
+        centerStatusLabel.setStyle(GUIStyles.TITLE);
+
+        VBoxCenterPane centerPane = new VBoxCenterPane(canvas, centerStatusLabel);
+        root.setCenter(centerPane);
 
         Scene scene = new Scene(root, width, height);
 
         scene.setOnKeyPressed(e -> {
+            if (localGameOver) {
+                return;
+            }
+
             if (e.getCode() == KeyCode.LEFT) {
                 selectedLane = Math.max(0, selectedLane - 1);
                 laneLabel.setText("Carril: " + (selectedLane + 1));
@@ -119,20 +131,23 @@ public class GameScene {
                 double delta = (now - last) / 1_000_000_000.0;
                 last = now;
 
-                update(delta);
+                if (!localGameOver) {
+                    update(delta);
+                    controller.sendGameState(hp, score, level);
+
+                    if (hp <= 0) {
+                        localGameOver = true;
+                        centerStatusLabel.setText("Waiting for opponent...");
+                        controller.sendGameOver(hp, score, level);
+                    }
+                }
+
                 render(gc);
 
                 hpLabel.setText("HP: " + hp);
                 scoreLabel.setText("Score: " + score);
                 levelLabel.setText("Nivel: " + level);
                 opponentLabel.setText("Rival HP: " + opponentHp + " | Rival Score: " + opponentScore + " | Rival Nivel: " + opponentLevel);
-
-                controller.sendGameState(hp, score, level);
-
-                if (hp <= 0) {
-                    controller.sendGameOver(hp, score, level);
-                    stop();
-                }
             }
         }.start();
 
@@ -283,6 +298,11 @@ public class GameScene {
 
     public void handleOpponentGameOver(String payload) {
         opponentHp = 0;
+        opponentGameOver = true;
+
+        if (!localGameOver) {
+            centerStatusLabel.setText("You win!");
+        }
     }
 
     private static class FallingAttack {
@@ -298,6 +318,13 @@ public class GameScene {
             this.damage = damage;
             this.speed = speed;
             this.y = 70;
+        }
+    }
+
+    private static class VBoxCenterPane extends javafx.scene.layout.VBox {
+        VBoxCenterPane(Canvas canvas, Label label) {
+            super(12, canvas, label);
+            setAlignment(Pos.CENTER);
         }
     }
 }
