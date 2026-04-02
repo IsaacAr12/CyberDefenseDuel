@@ -10,5 +10,17 @@
       "malwareXp": 0,
       "cryptoXp": 0
     }
+  },
+  {
+    "username": "Jeremias4130",
+    "password": "4321",
+    "avatar": "Captain Firewall",
+    "stats": {
+      "totalScore": 0,
+      "gamesPlayed": 0,
+      "networkXp": 0,
+      "malwareXp": 0,
+      "cryptoXp": 0
+    }
   }
 ]

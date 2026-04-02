@@ -5,7 +5,6 @@ public class PlayerSetupData {
     private String username;
     private String selectedAvatar;
     private String selectedMap;
-    private String opponentMap;
     private String finalMap;
 
     public String getUsername() {
@@ -30,14 +29,6 @@ public class PlayerSetupData {
 
     public void setSelectedMap(String selectedMap) {
         this.selectedMap = selectedMap;
-    }
-
-    public String getOpponentMap() {
-        return opponentMap;
-    }
-
-    public void setOpponentMap(String opponentMap) {
-        this.opponentMap = opponentMap;
     }
 
     public String getFinalMap() {

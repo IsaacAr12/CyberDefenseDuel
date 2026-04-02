@@ -1,50 +1,52 @@
 package client.gui;
 
-import javafx.animation.PauseTransition;
+import client.ClientController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 
 public class MatchmakingScene {
 
     private final GUIManager guiManager;
+    private final ClientController controller;
 
-    public MatchmakingScene(GUIManager guiManager) {
+    public MatchmakingScene(GUIManager guiManager, ClientController controller) {
         this.guiManager = guiManager;
+        this.controller = controller;
     }
 
     public Scene createScene() {
-        Label title = new Label("Buscando otro jugador...");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        Label title = new Label("Matchmaking");
+        title.setStyle(GUIStyles.TITLE);
 
-        Label info = new Label("Avatar escogido: " + guiManager.getSetupData().getSelectedAvatar());
-        info.setStyle("-fx-font-size: 16px;");
+        Label info = new Label("Avatar: " + guiManager.getSetupData().getSelectedAvatar());
+        info.setStyle(GUIStyles.LABEL);
 
-        Label status = new Label("Esperando emparejamiento...");
-        status.setStyle("-fx-font-size: 14px; -fx-text-fill: yellow;");
+        Label status = new Label("Presiona buscar para entrar a la cola.");
+        status.setStyle(GUIStyles.SUBTITLE);
 
-        Button simulateMatchButton = new Button("Simular jugador encontrado");
+        Button searchButton = new Button("Buscar Partida");
+        searchButton.setStyle(GUIStyles.BUTTON);
+
         Button backButton = new Button("Volver");
+        backButton.setStyle(GUIStyles.BUTTON);
 
-        simulateMatchButton.setOnAction(e -> {
-            status.setText("¡Jugador encontrado!");
-            simulateMatchButton.setDisable(true);
-
-            PauseTransition pause = new PauseTransition(Duration.seconds(1.5));
-            pause.setOnFinished(event -> guiManager.showMapScene());
-            pause.play();
+        searchButton.setOnAction(e -> {
+            status.setText("Buscando rival...");
+            controller.requestMatch();
         });
 
         backButton.setOnAction(e -> guiManager.showAvatarScene());
 
-        VBox root = new VBox(16, title, info, status, simulateMatchButton, backButton);
+        guiManager.setMatchmakingStatusLabel(status);
+
+        VBox root = new VBox(16, title, info, status, searchButton, backButton);
         root.setPadding(new Insets(30));
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #1b262c, #0f4c75);");
+        root.setStyle(GUIStyles.ROOT);
 
         return new Scene(root, 900, 600);
     }

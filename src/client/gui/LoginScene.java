@@ -1,66 +1,80 @@
 package client.gui;
 
-import client.PlayerSetupData;
+import client.ClientController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import server.DatabaseManager;
 
 public class LoginScene {
 
     private final GUIManager guiManager;
-    private final DatabaseManager databaseManager;
+    private final ClientController controller;
 
-    public LoginScene(GUIManager guiManager) {
+    public LoginScene(GUIManager guiManager, ClientController controller) {
         this.guiManager = guiManager;
-        this.databaseManager = new DatabaseManager();
+        this.controller = controller;
     }
 
     public Scene createScene() {
         Label title = new Label("Cyber Defense Duel");
-        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+        title.setStyle(GUIStyles.TITLE);
 
         Label subtitle = new Label("Login / Registro");
-        subtitle.setStyle("-fx-font-size: 16px;");
+        subtitle.setStyle(GUIStyles.SUBTITLE);
+
+        TextField hostField = new TextField("127.0.0.1");
+        hostField.setPromptText("IP del servidor");
+        hostField.setStyle(GUIStyles.FIELD);
+
+        TextField portField = new TextField("5000");
+        portField.setPromptText("Puerto");
+        portField.setStyle(GUIStyles.FIELD);
 
         TextField usernameField = new TextField();
         usernameField.setPromptText("Nombre de usuario");
+        usernameField.setStyle(GUIStyles.FIELD);
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Contraseña");
+        passwordField.setStyle(GUIStyles.FIELD);
 
         Label statusLabel = new Label();
-        statusLabel.setStyle("-fx-text-fill: red; -fx-font-size: 13px;");
+        statusLabel.setStyle(GUIStyles.ERROR);
+
+        Button connectButton = new Button("Conectar");
+        connectButton.setStyle(GUIStyles.BUTTON);
 
         Button loginButton = new Button("Iniciar Sesión");
-        Button registerButton = new Button("Registrarse");
+        loginButton.setStyle(GUIStyles.BUTTON);
 
-        loginButton.setMaxWidth(Double.MAX_VALUE);
-        registerButton.setMaxWidth(Double.MAX_VALUE);
+        Button registerButton = new Button("Registrarse");
+        registerButton.setStyle(GUIStyles.BUTTON);
+
+        connectButton.setOnAction(e -> {
+            try {
+                controller.connect(hostField.getText().trim(), Integer.parseInt(portField.getText().trim()));
+                statusLabel.setStyle(GUIStyles.SUCCESS);
+                statusLabel.setText("Conectado al servidor.");
+            } catch (Exception ex) {
+                statusLabel.setStyle(GUIStyles.ERROR);
+                statusLabel.setText("No se pudo conectar al servidor.");
+            }
+        });
 
         loginButton.setOnAction(e -> {
             String username = usernameField.getText().trim();
             String password = passwordField.getText().trim();
 
             if (username.isEmpty() || password.isEmpty()) {
+                statusLabel.setStyle(GUIStyles.ERROR);
                 statusLabel.setText("Debes completar usuario y contraseña.");
                 return;
             }
 
-            boolean loginOk = databaseManager.loginUser(username, password);
-
-            if (loginOk) {
-                PlayerSetupData data = guiManager.getSetupData();
-                data.setUsername(username);
-                statusLabel.setStyle("-fx-text-fill: lightgreen; -fx-font-size: 13px;");
-                statusLabel.setText("Login exitoso.");
-                guiManager.showAvatarScene();
-            } else {
-                statusLabel.setStyle("-fx-text-fill: red; -fx-font-size: 13px;");
-                statusLabel.setText("Usuario o contraseña incorrectos.");
-            }
+            guiManager.getSetupData().setUsername(username);
+            controller.login(username, password);
         });
 
         registerButton.setOnAction(e -> {
@@ -68,28 +82,34 @@ public class LoginScene {
             String password = passwordField.getText().trim();
 
             if (username.isEmpty() || password.isEmpty()) {
+                statusLabel.setStyle(GUIStyles.ERROR);
                 statusLabel.setText("Debes completar usuario y contraseña.");
                 return;
             }
 
-            boolean registered = databaseManager.registerUser(username, password);
-
-            if (registered) {
-                PlayerSetupData data = guiManager.getSetupData();
-                data.setUsername(username);
-                statusLabel.setStyle("-fx-text-fill: lightgreen; -fx-font-size: 13px;");
-                statusLabel.setText("Usuario registrado correctamente.");
-                guiManager.showAvatarScene();
-            } else {
-                statusLabel.setStyle("-fx-text-fill: red; -fx-font-size: 13px;");
-                statusLabel.setText("Ese usuario ya existe.");
-            }
+            guiManager.getSetupData().setUsername(username);
+            controller.register(username, password);
         });
 
-        VBox root = new VBox(12, title, subtitle, usernameField, passwordField, loginButton, registerButton, statusLabel);
+        guiManager.setLoginStatusLabel(statusLabel);
+
+        VBox root = new VBox(
+                12,
+                title,
+                subtitle,
+                hostField,
+                portField,
+                usernameField,
+                passwordField,
+                connectButton,
+                loginButton,
+                registerButton,
+                statusLabel
+        );
+
         root.setPadding(new Insets(30));
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #101820, #1f2f46);");
+        root.setStyle(GUIStyles.ROOT);
 
         return new Scene(root, 900, 600);
     }

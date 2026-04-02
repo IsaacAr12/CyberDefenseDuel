@@ -5,24 +5,21 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import server.DatabaseManager;
 
 public class AvatarScene {
 
     private final GUIManager guiManager;
-    private final DatabaseManager databaseManager;
 
     public AvatarScene(GUIManager guiManager) {
         this.guiManager = guiManager;
-        this.databaseManager = new DatabaseManager();
     }
 
     public Scene createScene() {
         Label title = new Label("Escoge tu Personaje");
-        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        title.setStyle(GUIStyles.TITLE);
 
         Label userLabel = new Label("Jugador: " + guiManager.getSetupData().getUsername());
-        userLabel.setStyle("-fx-font-size: 14px;");
+        userLabel.setStyle(GUIStyles.LABEL);
 
         ToggleGroup avatarGroup = new ToggleGroup();
 
@@ -31,16 +28,24 @@ public class AvatarScene {
         RadioButton avatar3 = new RadioButton("Malware Muncher");
         RadioButton avatar4 = new RadioButton("Crypto Llama");
 
+        avatar1.setStyle(GUIStyles.LABEL);
+        avatar2.setStyle(GUIStyles.LABEL);
+        avatar3.setStyle(GUIStyles.LABEL);
+        avatar4.setStyle(GUIStyles.LABEL);
+
         avatar1.setToggleGroup(avatarGroup);
         avatar2.setToggleGroup(avatarGroup);
         avatar3.setToggleGroup(avatarGroup);
         avatar4.setToggleGroup(avatarGroup);
 
         Label statusLabel = new Label();
-        statusLabel.setStyle("-fx-text-fill: red;");
+        statusLabel.setStyle(GUIStyles.ERROR);
 
         Button continueButton = new Button("Continuar");
+        continueButton.setStyle(GUIStyles.BUTTON);
+
         Button backButton = new Button("Volver");
+        backButton.setStyle(GUIStyles.BUTTON);
 
         continueButton.setOnAction(e -> {
             RadioButton selected = (RadioButton) avatarGroup.getSelectedToggle();
@@ -50,12 +55,7 @@ public class AvatarScene {
                 return;
             }
 
-            String avatar = selected.getText();
-            String username = guiManager.getSetupData().getUsername();
-
-            guiManager.getSetupData().setSelectedAvatar(avatar);
-            databaseManager.updateAvatar(username, avatar);
-
+            guiManager.getSetupData().setSelectedAvatar(selected.getText());
             guiManager.showMatchmakingScene();
         });
 
@@ -76,7 +76,7 @@ public class AvatarScene {
 
         root.setPadding(new Insets(30));
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #16213e, #0f3460);");
+        root.setStyle(GUIStyles.ROOT);
 
         return new Scene(root, 900, 600);
     }
