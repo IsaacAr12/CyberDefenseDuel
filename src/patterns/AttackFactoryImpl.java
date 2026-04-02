@@ -30,9 +30,9 @@ public class AttackFactoryImpl implements AttackFactory {
     }
 
     private int resolveDamage(String type) {
-        if (config != null && config.getDamageByType() != null) {
-            Integer value = config.getDamageByType().get(type.toUpperCase());
-            if (value != null) {
+        if (config != null) {
+            int value = config.getDamageForType(type);
+            if (value > 0) {
                 return value;
             }
         }

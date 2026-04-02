@@ -14,9 +14,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 public class GameScene {
@@ -29,6 +26,8 @@ public class GameScene {
     private final double height = 600;
     private final double[] laneX = {200, 450, 700};
 
+    private static final int MAX_ATTACKS = 256;
+
     private int selectedLane = 1;
     private int hp = 100;
     private int score = 0;
@@ -36,7 +35,9 @@ public class GameScene {
     private int opponentHp = 100;
     private int opponentScore = 0;
 
-    private final List<FallingAttack> attacks = new ArrayList<>();
+    private final FallingAttack[] attacks = new FallingAttack[MAX_ATTACKS];
+    private int attackCount = 0;
+
     private final Random random = new Random();
     private double spawnTimer = 0;
 
@@ -139,43 +140,51 @@ public class GameScene {
             spawnAttack();
         }
 
-        Iterator<FallingAttack> iterator = attacks.iterator();
-
-        while (iterator.hasNext()) {
-            FallingAttack atk = iterator.next();
+        int i = 0;
+        while (i < attackCount) {
+            FallingAttack atk = attacks[i];
             atk.y += atk.speed * delta;
 
             if (atk.y >= 500) {
                 hp -= atk.damage;
-                iterator.remove();
+                removeAttackAt(i);
+            } else {
+                i++;
             }
         }
     }
 
     private void defend(String expectedType) {
-        FallingAttack target = null;
+        int targetIndex = -1;
 
-        for (FallingAttack atk : attacks) {
+        for (int i = 0; i < attackCount; i++) {
+            FallingAttack atk = attacks[i];
             if (atk.lane == selectedLane && atk.y >= 380 && atk.y <= 520) {
-                target = atk;
+                targetIndex = i;
                 break;
             }
         }
 
-        if (target == null) {
+        if (targetIndex == -1) {
             return;
         }
 
+        FallingAttack target = attacks[targetIndex];
+
         if (target.type.equals(expectedType)) {
             score += 10;
-            attacks.remove(target);
         } else {
             hp -= target.damage;
-            attacks.remove(target);
         }
+
+        removeAttackAt(targetIndex);
     }
 
     private void spawnAttack() {
+        if (attackCount >= MAX_ATTACKS) {
+            return;
+        }
+
         int lane = random.nextInt(3);
         int typeIndex = random.nextInt(3);
 
@@ -193,7 +202,21 @@ public class GameScene {
             damage = 10;
         }
 
-        attacks.add(new FallingAttack(lane, type, damage, 160));
+        attacks[attackCount] = new FallingAttack(lane, type, damage, 160);
+        attackCount++;
+    }
+
+    private void removeAttackAt(int index) {
+        if (index < 0 || index >= attackCount) {
+            return;
+        }
+
+        for (int i = index; i < attackCount - 1; i++) {
+            attacks[i] = attacks[i + 1];
+        }
+
+        attacks[attackCount - 1] = null;
+        attackCount--;
     }
 
     private void render(GraphicsContext gc) {
@@ -221,7 +244,9 @@ public class GameScene {
         gc.setFill(Color.LIGHTGREEN);
         gc.fillRect(laneX[selectedLane] - 40, 520, 80, 20);
 
-        for (FallingAttack atk : attacks) {
+        for (int i = 0; i < attackCount; i++) {
+            FallingAttack atk = attacks[i];
+
             if ("DDOS".equals(atk.type)) {
                 gc.setFill(Color.RED);
             } else if ("MALWARE".equals(atk.type)) {
