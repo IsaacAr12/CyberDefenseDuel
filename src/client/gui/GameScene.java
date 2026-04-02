@@ -31,9 +31,11 @@ public class GameScene {
     private int selectedLane = 1;
     private int hp = 100;
     private int score = 0;
+    private int level = 0;
 
     private int opponentHp = 100;
     private int opponentScore = 0;
+    private int opponentLevel = 0;
 
     private final FallingAttack[] attacks = new FallingAttack[MAX_ATTACKS];
     private int attackCount = 0;
@@ -44,6 +46,7 @@ public class GameScene {
     private Label hpLabel;
     private Label scoreLabel;
     private Label laneLabel;
+    private Label levelLabel;
     private Label opponentLabel;
 
     public GameScene(GUIManager guiManager, ClientController controller, String mapName) {
@@ -65,13 +68,16 @@ public class GameScene {
         laneLabel = new Label("Carril: 2");
         laneLabel.setStyle(GUIStyles.LABEL);
 
+        levelLabel = new Label("Nivel: 0");
+        levelLabel.setStyle(GUIStyles.LABEL);
+
         Label mapLabel = new Label("Mapa: " + mapName);
         mapLabel.setStyle(GUIStyles.LABEL);
 
-        opponentLabel = new Label("Rival HP: 100 | Rival Score: 0");
+        opponentLabel = new Label("Rival HP: 100 | Rival Score: 0 | Rival Nivel: 0");
         opponentLabel.setStyle(GUIStyles.LABEL);
 
-        HBox top = new HBox(24, hpLabel, scoreLabel, laneLabel, mapLabel, opponentLabel);
+        HBox top = new HBox(18, hpLabel, scoreLabel, laneLabel, levelLabel, mapLabel, opponentLabel);
         top.setAlignment(Pos.CENTER);
         top.setStyle("-fx-padding: 12;");
 
@@ -118,12 +124,13 @@ public class GameScene {
 
                 hpLabel.setText("HP: " + hp);
                 scoreLabel.setText("Score: " + score);
-                opponentLabel.setText("Rival HP: " + opponentHp + " | Rival Score: " + opponentScore);
+                levelLabel.setText("Nivel: " + level);
+                opponentLabel.setText("Rival HP: " + opponentHp + " | Rival Score: " + opponentScore + " | Rival Nivel: " + opponentLevel);
 
-                controller.sendGameState(hp, score, selectedLane);
+                controller.sendGameState(hp, score, level);
 
                 if (hp <= 0) {
-                    controller.sendGameOver(hp, score);
+                    controller.sendGameOver(hp, score, level);
                     stop();
                 }
             }
@@ -133,9 +140,12 @@ public class GameScene {
     }
 
     private void update(double delta) {
-        spawnTimer += delta;
+        level = score / 100;
 
-        if (spawnTimer >= 1.0) {
+        spawnTimer += delta;
+        double spawnInterval = Math.max(0.25, 1.0 - (level * 0.05));
+
+        if (spawnTimer >= spawnInterval) {
             spawnTimer = 0;
             spawnAttack();
         }
@@ -143,7 +153,7 @@ public class GameScene {
         int i = 0;
         while (i < attackCount) {
             FallingAttack atk = attacks[i];
-            atk.y += atk.speed * delta;
+            atk.y += (atk.speed + level * 10) * delta;
 
             if (atk.y >= 500) {
                 hp -= atk.damage;
@@ -266,6 +276,7 @@ public class GameScene {
             JsonObject obj = JsonParser.parseString(payload).getAsJsonObject();
             opponentHp = obj.get("hp").getAsInt();
             opponentScore = obj.get("score").getAsInt();
+            opponentLevel = obj.get("level").getAsInt();
         } catch (Exception ignored) {
         }
     }

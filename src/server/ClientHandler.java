@@ -55,7 +55,6 @@ public class ClientHandler extends Thread {
 
             case LOGIN: {
                 Credentials creds = gson.fromJson(msg.getPayload(), Credentials.class);
-
                 boolean ok = databaseManager.loginUser(creds.username, creds.password);
 
                 if (ok) {
@@ -69,7 +68,6 @@ public class ClientHandler extends Thread {
 
             case REGISTER: {
                 Credentials creds = gson.fromJson(msg.getPayload(), Credentials.class);
-
                 boolean ok = databaseManager.registerUser(creds.username, creds.password);
 
                 if (ok) {
@@ -121,16 +119,6 @@ public class ClientHandler extends Thread {
             out.flush();
         } catch (IOException e) {
             System.out.println("Error enviando mensaje: " + e.getMessage());
-        }
-    }
-
-    public void sendRawMessage(String raw) {
-        try {
-            out.write(raw);
-            out.newLine();
-            out.flush();
-        } catch (IOException e) {
-            System.out.println("Error enviando texto: " + e.getMessage());
         }
     }
 

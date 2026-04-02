@@ -1,8 +1,6 @@
 package client;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import javafx.application.Platform;
 import network.Message;
 import network.MessageType;
@@ -59,28 +57,21 @@ public class ClientController {
         ));
     }
 
-    public void sendGameState(int hp, int score, int lane) {
-        JsonObject obj = new JsonObject();
-        obj.addProperty("hp", hp);
-        obj.addProperty("score", score);
-        obj.addProperty("lane", lane);
-
+    public void sendGameState(int hp, int score, int level) {
+        OpponentStatePayload payload = new OpponentStatePayload(hp, score, level);
         client.sendMessage(new Message(
                 MessageType.GAME_STATE,
                 "CLIENT",
-                gson.toJson(obj)
+                gson.toJson(payload)
         ));
     }
 
-    public void sendGameOver(int hp, int score) {
-        JsonObject obj = new JsonObject();
-        obj.addProperty("hp", hp);
-        obj.addProperty("score", score);
-
+    public void sendGameOver(int hp, int score, int level) {
+        OpponentStatePayload payload = new OpponentStatePayload(hp, score, level);
         client.sendMessage(new Message(
                 MessageType.GAME_OVER,
                 "CLIENT",
-                gson.toJson(obj)
+                gson.toJson(payload)
         ));
     }
 
@@ -121,6 +112,18 @@ public class ClientController {
         Credentials(String username, String password) {
             this.username = username;
             this.password = password;
+        }
+    }
+
+    private static class OpponentStatePayload {
+        int hp;
+        int score;
+        int level;
+
+        OpponentStatePayload(int hp, int score, int level) {
+            this.hp = hp;
+            this.score = score;
+            this.level = level;
         }
     }
 }
