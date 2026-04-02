@@ -1,0 +1,24 @@
+{
+    "java.project.sourcePaths": [
+        "src"
+    ],
+    "java.project.referencedLibraries": [
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.graphics.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.controls.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\gson-2.10.1.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.media.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-swt.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.controls.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.graphics.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.web.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.fxml.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx-swt.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.base.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.fxml.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.swing.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.base.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.swing.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx-sdk-21\\lib\\javafx.web.jar",
+        "c:\\Users\\Jeremias\\Documents\\GitHub\\CyberDefenseDuel\\lib\\javafx.media.jar"
+    ]
+}

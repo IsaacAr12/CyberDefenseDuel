@@ -5,13 +5,16 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import server.DatabaseManager;
 
 public class AvatarScene {
 
     private final GUIManager guiManager;
+    private final DatabaseManager databaseManager;
 
     public AvatarScene(GUIManager guiManager) {
         this.guiManager = guiManager;
+        this.databaseManager = new DatabaseManager();
     }
 
     public Scene createScene() {
@@ -47,7 +50,12 @@ public class AvatarScene {
                 return;
             }
 
-            guiManager.getSetupData().setSelectedAvatar(selected.getText());
+            String avatar = selected.getText();
+            String username = guiManager.getSetupData().getUsername();
+
+            guiManager.getSetupData().setSelectedAvatar(avatar);
+            databaseManager.updateAvatar(username, avatar);
+
             guiManager.showMatchmakingScene();
         });
 

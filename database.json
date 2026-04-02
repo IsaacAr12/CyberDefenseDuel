@@ -1,0 +1,14 @@
+[
+  {
+    "username": "Jeremias3014",
+    "password": "1234",
+    "avatar": "Captain Firewall",
+    "stats": {
+      "totalScore": 0,
+      "gamesPlayed": 0,
+      "networkXp": 0,
+      "malwareXp": 0,
+      "cryptoXp": 0
+    }
+  }
+]
