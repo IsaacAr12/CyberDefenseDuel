@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import model.PlayerStats;
 import model.User;
 
 import java.io.IOException;
@@ -43,6 +44,16 @@ public class DatabaseManager {
                     users = new User[0];
                 }
             }
+
+            for (int i = 0; i < users.length; i++) {
+                if (users[i].getStats() == null) {
+                    users[i].setStats(new PlayerStats());
+                }
+                if (users[i].getAvatar() == null || users[i].getAvatar().isEmpty()) {
+                    users[i].setAvatar("Captain Firewall");
+                }
+            }
+
         } catch (IOException e) {
             users = new User[0];
             System.out.println("No se pudo leer database.json: " + e.getMessage());
@@ -57,11 +68,11 @@ public class DatabaseManager {
         }
     }
 
-    public boolean registerUser(String username, String password) {
+    public synchronized boolean registerUser(String username, String password) {
         return registerUser(username, password, "Captain Firewall");
     }
 
-    public boolean registerUser(String username, String password, String avatar) {
+    public synchronized boolean registerUser(String username, String password, String avatar) {
         if (findUser(username) != null) {
             return false;
         }
@@ -72,12 +83,12 @@ public class DatabaseManager {
         return true;
     }
 
-    public boolean loginUser(String username, String password) {
+    public synchronized boolean loginUser(String username, String password) {
         User user = findUser(username);
         return user != null && user.getPassword().equals(password);
     }
 
-    public User findUser(String username) {
+    public synchronized User findUser(String username) {
         for (User user : users) {
             if (user != null && user.getUsername().equals(username)) {
                 return user;
@@ -86,7 +97,7 @@ public class DatabaseManager {
         return null;
     }
 
-    public boolean updateAvatar(String username, String avatar) {
+    public synchronized boolean updateAvatar(String username, String avatar) {
         User user = findUser(username);
         if (user == null) {
             return false;
@@ -97,7 +108,23 @@ public class DatabaseManager {
         return true;
     }
 
-    public User[] getUsers() {
+    public synchronized void updateEndSessionStats(String username, int score, int networkXp, int malwareXp, int cryptoXp) {
+        User user = findUser(username);
+        if (user == null) {
+            return;
+        }
+
+        PlayerStats stats = user.getStats();
+        stats.addTotalScore(score);
+        stats.addGamePlayed();
+        stats.addNetworkXp(networkXp);
+        stats.addMalwareXp(malwareXp);
+        stats.addCryptoXp(cryptoXp);
+
+        saveDatabase();
+    }
+
+    public synchronized User[] getUsers() {
         return users;
     }
 

@@ -1,5 +1,6 @@
 package server;
 
+import com.google.gson.Gson;
 import network.Message;
 import network.MessageType;
 
@@ -9,6 +10,7 @@ public class GameSession {
 
     private final ClientHandler playerA;
     private final ClientHandler playerB;
+    private final DatabaseManager databaseManager;
 
     private String mapA;
     private String mapB;
@@ -17,12 +19,22 @@ public class GameSession {
     private boolean gameOverB;
     private boolean sessionClosed;
 
-    public GameSession(ClientHandler playerA, ClientHandler playerB) {
+    private EndStats statsA;
+    private EndStats statsB;
+
+    private final Gson gson = new Gson();
+
+    public GameSession(ClientHandler playerA, ClientHandler playerB, DatabaseManager databaseManager) {
         this.playerA = playerA;
         this.playerB = playerB;
+        this.databaseManager = databaseManager;
+
         this.gameOverA = false;
         this.gameOverB = false;
         this.sessionClosed = false;
+
+        this.statsA = new EndStats();
+        this.statsB = new EndStats();
     }
 
     public void start() {
@@ -60,18 +72,53 @@ public class GameSession {
             return;
         }
 
+        EndStats endStats;
+        try {
+            endStats = gson.fromJson(payload, EndStats.class);
+            if (endStats == null) {
+                endStats = new EndStats();
+            }
+        } catch (Exception e) {
+            endStats = new EndStats();
+        }
+
         if (sender == playerA) {
             gameOverA = true;
+            statsA = endStats;
         } else if (sender == playerB) {
             gameOverB = true;
+            statsB = endStats;
         }
 
         ClientHandler target = (sender == playerA) ? playerB : playerA;
         target.sendMessage(new Message(MessageType.GAME_OVER, sender.getUsername(), payload));
 
         if (gameOverA && gameOverB) {
+            persistSessionResults();
             sessionClosed = true;
             sendToBoth(new Message(MessageType.ERROR, "SERVER", "SESSION_FINISHED"));
+        }
+    }
+
+    private void persistSessionResults() {
+        if (playerA.getUsername() != null) {
+            databaseManager.updateEndSessionStats(
+                    playerA.getUsername(),
+                    statsA.score,
+                    statsA.networkXp,
+                    statsA.malwareXp,
+                    statsA.cryptoXp
+            );
+        }
+
+        if (playerB.getUsername() != null) {
+            databaseManager.updateEndSessionStats(
+                    playerB.getUsername(),
+                    statsB.score,
+                    statsB.networkXp,
+                    statsB.malwareXp,
+                    statsB.cryptoXp
+            );
         }
     }
 
@@ -82,5 +129,23 @@ public class GameSession {
     private void sendToBoth(Message msg) {
         playerA.sendMessage(msg);
         playerB.sendMessage(msg);
+    }
+
+    private static class EndStats {
+        int hp;
+        int score;
+        int level;
+        int networkXp;
+        int malwareXp;
+        int cryptoXp;
+
+        EndStats() {
+            this.hp = 0;
+            this.score = 0;
+            this.level = 0;
+            this.networkXp = 0;
+            this.malwareXp = 0;
+            this.cryptoXp = 0;
+        }
     }
 }

@@ -37,6 +37,10 @@ public class GameScene {
     private int opponentScore = 0;
     private int opponentLevel = 0;
 
+    private int networkXp = 0;
+    private int malwareXp = 0;
+    private int cryptoXp = 0;
+
     private final FallingAttack[] attacks = new FallingAttack[MAX_ATTACKS];
     private int attackCount = 0;
 
@@ -86,7 +90,7 @@ public class GameScene {
         top.setStyle("-fx-padding: 12;");
         root.setTop(top);
 
-        Canvas canvas = new Canvas(width, height - 100);
+        Canvas canvas = new Canvas(width, height - 80);
 
         centerStatusLabel = new Label("");
         centerStatusLabel.setStyle(GUIStyles.TITLE);
@@ -138,7 +142,7 @@ public class GameScene {
                     if (hp <= 0) {
                         localGameOver = true;
                         centerStatusLabel.setText("Waiting for opponent...");
-                        controller.sendGameOver(hp, score, level);
+                        controller.sendGameOver(hp, score, level, networkXp, malwareXp, cryptoXp);
                     }
                 }
 
@@ -170,7 +174,7 @@ public class GameScene {
             FallingAttack atk = attacks[i];
             atk.y += (atk.speed + level * 10) * delta;
 
-            if (atk.y >= 500) {
+            if (atk.y >= height - 90) {
                 hp -= atk.damage;
                 removeAttackAt(i);
             } else {
@@ -184,7 +188,7 @@ public class GameScene {
 
         for (int i = 0; i < attackCount; i++) {
             FallingAttack atk = attacks[i];
-            if (atk.lane == selectedLane && atk.y >= 380 && atk.y <= 520) {
+            if (atk.lane == selectedLane && atk.y >= height - 170 && atk.y <= height - 70) {
                 targetIndex = i;
                 break;
             }
@@ -198,6 +202,14 @@ public class GameScene {
 
         if (target.type.equals(expectedType)) {
             score += 10;
+
+            if ("DDOS".equals(target.type)) {
+                networkXp += 10;
+            } else if ("MALWARE".equals(target.type)) {
+                malwareXp += 10;
+            } else if ("CRED".equals(target.type)) {
+                cryptoXp += 10;
+            }
         } else {
             hp -= target.damage;
         }
@@ -245,29 +257,67 @@ public class GameScene {
     }
 
     private void render(GraphicsContext gc) {
-        gc.setFill(Color.web("#111827"));
+        gc.setFill(Color.web("#08142b"));
         gc.fillRect(0, 0, width, height);
 
-        if ("Habitacion de Programador".equalsIgnoreCase(mapName)) {
-            gc.setFill(Color.web("#1f2937"));
-            gc.fillRect(50, 40, 180, 90);
-            gc.fillRect(670, 40, 180, 90);
+        double playTop = 40;
+        double playBottom = height - 30;
+        double playHeight = playBottom - playTop;
 
-            gc.setFill(Color.web("#0b1220"));
-            gc.fillRect(90, 150, 720, 370);
+        double laneWidth = 150;
+        double laneHeight = playHeight - 40;
+        double laneTop = playTop + 10;
+
+        if ("Habitacion de Programador".equalsIgnoreCase(mapName)) {
+            gc.setFill(Color.web("#0d1b2a"));
+            gc.fillRect(0, 0, width, height);
+
+            gc.setFill(Color.web("#1b263b"));
+            gc.fillRect(40, 20, width - 80, height - 40);
         } else {
-            gc.setFill(Color.web("#22303c"));
-            gc.fillRect(80, 100, 740, 420);
+            gc.setFill(Color.web("#10243f"));
+            gc.fillRect(0, 0, width, height);
+
+            gc.setFill(Color.web("#1f3b57"));
+            gc.fillRect(40, 20, width - 80, height - 40);
         }
 
         for (int i = 0; i < 3; i++) {
-            gc.setStroke(i == selectedLane ? Color.YELLOW : Color.WHITE);
-            gc.setLineWidth(i == selectedLane ? 5 : 2);
-            gc.strokeRect(laneX[i] - 60, 60, 120, 460);
+            double laneLeft = laneX[i] - laneWidth / 2.0;
+
+            if (i == selectedLane) {
+                gc.setFill(Color.web("#2c4f7a"));
+                gc.fillRect(laneLeft, laneTop, laneWidth, laneHeight);
+
+                gc.setStroke(Color.YELLOW);
+                gc.setLineWidth(5);
+                gc.strokeRect(laneLeft, laneTop, laneWidth, laneHeight);
+            } else {
+                gc.setFill(Color.web("#31465f"));
+                gc.fillRect(laneLeft, laneTop, laneWidth, laneHeight);
+
+                gc.setStroke(Color.WHITE);
+                gc.setLineWidth(2);
+                gc.strokeRect(laneLeft, laneTop, laneWidth, laneHeight);
+            }
         }
 
-        gc.setFill(Color.LIGHTGREEN);
-        gc.fillRect(laneX[selectedLane] - 40, 520, 80, 20);
+        double px = laneX[selectedLane];
+        double py = laneTop + laneHeight - 55;
+
+        double[] triX = {px, px - 28, px + 28};
+        double[] triY = {py - 35, py + 20, py + 20};
+
+        gc.setFill(Color.web("#4ade80"));
+        gc.fillPolygon(triX, triY, 3);
+
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(2);
+        gc.strokePolygon(triX, triY, 3);
+
+        gc.setStroke(Color.web("#86efac"));
+        gc.setLineWidth(3);
+        gc.strokeLine(px - 38, py + 28, px + 38, py + 28);
 
         for (int i = 0; i < attackCount; i++) {
             FallingAttack atk = attacks[i];

@@ -13,7 +13,7 @@ public class Server {
     public Server(int port) {
         this.port = port;
         this.databaseManager = new DatabaseManager();
-        this.matchManager = new MatchManager();
+        this.matchManager = new MatchManager(databaseManager);
     }
 
     public void start() {

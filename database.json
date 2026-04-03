@@ -4,11 +4,11 @@
     "password": "1234",
     "avatar": "Captain Firewall",
     "stats": {
-      "totalScore": 0,
-      "gamesPlayed": 0,
-      "networkXp": 0,
-      "malwareXp": 0,
-      "cryptoXp": 0
+      "totalScore": 160,
+      "gamesPlayed": 4,
+      "networkXp": 140,
+      "malwareXp": 10,
+      "cryptoXp": 10
     }
   },
   {
@@ -16,9 +16,9 @@
     "password": "4321",
     "avatar": "Captain Firewall",
     "stats": {
-      "totalScore": 0,
-      "gamesPlayed": 0,
-      "networkXp": 0,
+      "totalScore": 30,
+      "gamesPlayed": 4,
+      "networkXp": 30,
       "malwareXp": 0,
       "cryptoXp": 0
     }

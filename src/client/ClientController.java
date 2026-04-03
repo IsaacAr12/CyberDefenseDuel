@@ -58,7 +58,7 @@ public class ClientController {
     }
 
     public void sendGameState(int hp, int score, int level) {
-        OpponentStatePayload payload = new OpponentStatePayload(hp, score, level);
+        OpponentStatePayload payload = new OpponentStatePayload(hp, score, level, 0, 0, 0);
         client.sendMessage(new Message(
                 MessageType.GAME_STATE,
                 "CLIENT",
@@ -66,8 +66,8 @@ public class ClientController {
         ));
     }
 
-    public void sendGameOver(int hp, int score, int level) {
-        OpponentStatePayload payload = new OpponentStatePayload(hp, score, level);
+    public void sendGameOver(int hp, int score, int level, int networkXp, int malwareXp, int cryptoXp) {
+        OpponentStatePayload payload = new OpponentStatePayload(hp, score, level, networkXp, malwareXp, cryptoXp);
         client.sendMessage(new Message(
                 MessageType.GAME_OVER,
                 "CLIENT",
@@ -122,11 +122,17 @@ public class ClientController {
         int hp;
         int score;
         int level;
+        int networkXp;
+        int malwareXp;
+        int cryptoXp;
 
-        OpponentStatePayload(int hp, int score, int level) {
+        OpponentStatePayload(int hp, int score, int level, int networkXp, int malwareXp, int cryptoXp) {
             this.hp = hp;
             this.score = score;
             this.level = level;
+            this.networkXp = networkXp;
+            this.malwareXp = malwareXp;
+            this.cryptoXp = cryptoXp;
         }
     }
 }

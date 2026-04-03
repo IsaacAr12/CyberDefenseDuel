@@ -45,6 +45,9 @@ public class User {
     }
 
     public PlayerStats getStats() {
+        if (stats == null) {
+            stats = new PlayerStats();
+        }
         return stats;
     }
 
