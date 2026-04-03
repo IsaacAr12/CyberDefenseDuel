@@ -2,13 +2,13 @@
   {
     "username": "Jeremias3014",
     "password": "1234",
-    "avatar": "Captain Firewall",
+    "avatar": "Capitan Firewall",
     "stats": {
-      "totalScore": 730,
-      "gamesPlayed": 13,
-      "networkXp": 390,
-      "malwareXp": 140,
-      "cryptoXp": 200
+      "totalScore": 1530,
+      "gamesPlayed": 25,
+      "networkXp": 890,
+      "malwareXp": 250,
+      "cryptoXp": 390
     }
   },
   {
@@ -16,9 +16,9 @@
     "password": "4321",
     "avatar": "Byte Ninja",
     "stats": {
-      "totalScore": 370,
-      "gamesPlayed": 11,
-      "networkXp": 90,
+      "totalScore": 460,
+      "gamesPlayed": 23,
+      "networkXp": 180,
       "malwareXp": 170,
       "cryptoXp": 110
     }

@@ -3,85 +3,181 @@ package client.gui;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
+import java.io.InputStream;
 
 public class AvatarScene {
 
     private final GUIManager guiManager;
+
+    private AvatarCard selectedCard;
+    private Label statusLabel;
 
     public AvatarScene(GUIManager guiManager) {
         this.guiManager = guiManager;
     }
 
     public Scene createScene() {
-        Label title = new Label("Escoge tu Personaje");
-        title.setStyle(GUIStyles.TITLE);
+        BorderPane root = new BorderPane();
+        root.setStyle("-fx-background-color: #14a3dc;");
 
-        Label userLabel = new Label("Jugador: " + guiManager.getSetupData().getUsername());
-        userLabel.setStyle(GUIStyles.LABEL);
+        Label title = new Label("SELECCIONA A TU PERSONAJE");
+        title.setStyle(
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 26px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: #a64ac9;" +
+                "-fx-padding: 12 24 12 24;"
+        );
 
-        ToggleGroup avatarGroup = new ToggleGroup();
+        StackPane topPane = new StackPane(title);
+        topPane.setPadding(new Insets(20, 0, 10, 0));
+        root.setTop(topPane);
 
-        RadioButton avatar1 = new RadioButton("Captain Firewall");
-        RadioButton avatar2 = new RadioButton("Byte Ninja");
-        RadioButton avatar3 = new RadioButton("Malware Muncher");
-        RadioButton avatar4 = new RadioButton("Crypto Llama");
-        RadioButton avatar5 = new RadioButton("Packet Pirate");
-        RadioButton avatar6 = new RadioButton("Null Pointer Paladin");
+        FlowPane cardsPane = new FlowPane();
+        cardsPane.setHgap(50);
+        cardsPane.setVgap(35);
+        cardsPane.setPadding(new Insets(20, 20, 20, 20));
+        cardsPane.setAlignment(Pos.TOP_CENTER);
 
-        avatar1.setStyle(GUIStyles.LABEL);
-        avatar2.setStyle(GUIStyles.LABEL);
-        avatar3.setStyle(GUIStyles.LABEL);
-        avatar4.setStyle(GUIStyles.LABEL);
-        avatar5.setStyle(GUIStyles.LABEL);
-        avatar6.setStyle(GUIStyles.LABEL);
+        AvatarCard firewall = createCard("Capitan Firewall", "/images/personajes/Capitan Firewall marco.png");
+        AvatarCard ninja = createCard("Byte Ninja", "/images/personajes/Byte Ninja marco.png");
+        AvatarCard pirate = createCard("Packet Pirate", "/images/personajes/Packet Pirate marco.png");
+        AvatarCard paladin = createCard("Null Pointer Paladin", "/images/personajes/Null Pointer Paladin marco.png");
+        AvatarCard muncher = createCard("Malware Muncher", "/images/personajes/Malware Muncher marco.png");
 
-        avatar1.setToggleGroup(avatarGroup);
-        avatar2.setToggleGroup(avatarGroup);
-        avatar3.setToggleGroup(avatarGroup);
-        avatar4.setToggleGroup(avatarGroup);
-        avatar5.setToggleGroup(avatarGroup);
-        avatar6.setToggleGroup(avatarGroup);
+        cardsPane.getChildren().addAll(
+                firewall.container,
+                ninja.container,
+                pirate.container,
+                paladin.container,
+                muncher.container
+        );
 
-        Label statusLabel = new Label();
-        statusLabel.setStyle(GUIStyles.ERROR);
+        root.setCenter(cardsPane);
 
-        Button continueButton = new Button("Continuar");
-        continueButton.setStyle(GUIStyles.BUTTON);
+        statusLabel = new Label("Jugador: " + guiManager.getSetupData().getUsername());
+        statusLabel.setStyle(
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 18px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        Button continueButton = new Button("CONTINUAR");
+        continueButton.setStyle(
+                "-fx-background-color: #a64ac9;" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 16px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 10 22 10 22;"
+        );
 
         continueButton.setOnAction(e -> {
-            RadioButton selected = (RadioButton) avatarGroup.getSelectedToggle();
-
-            if (selected == null) {
+            if (selectedCard == null) {
                 statusLabel.setText("Debes escoger un personaje.");
                 return;
             }
 
-            String avatar = selected.getText();
+            String avatar = selectedCard.avatarName;
             guiManager.getSetupData().setSelectedAvatar(avatar);
             guiManager.getController().sendAvatarSelection(avatar);
             guiManager.showMatchmakingScene();
         });
 
-        VBox root = new VBox(
-                12,
-                title,
-                userLabel,
-                avatar1,
-                avatar2,
-                avatar3,
-                avatar4,
-                avatar5,
-                avatar6,
-                continueButton,
-                statusLabel
-        );
-
-        root.setPadding(new Insets(30));
-        root.setAlignment(Pos.CENTER);
-        root.setStyle(GUIStyles.ROOT);
+        VBox bottomBox = new VBox(12, statusLabel, continueButton);
+        bottomBox.setAlignment(Pos.CENTER);
+        bottomBox.setPadding(new Insets(10, 0, 20, 0));
+        root.setBottom(bottomBox);
 
         return new Scene(root);
+    }
+
+    private AvatarCard createCard(String avatarName, String imagePath) {
+        Image image = loadImage(imagePath);
+
+        ImageView imageView = new ImageView();
+        imageView.setFitWidth(265);
+        imageView.setFitHeight(265);
+        imageView.setPreserveRatio(true);
+
+        if (image != null) {
+            imageView.setImage(image);
+        }
+
+        Rectangle selectionBorder = new Rectangle(280, 280);
+        selectionBorder.setArcWidth(18);
+        selectionBorder.setArcHeight(18);
+        selectionBorder.setFill(Color.TRANSPARENT);
+        selectionBorder.setStroke(Color.TRANSPARENT);
+        selectionBorder.setStrokeWidth(6);
+
+        StackPane imageBox = new StackPane(selectionBorder, imageView);
+        imageBox.setMinSize(280, 280);
+        imageBox.setMaxSize(280, 280);
+        imageBox.setStyle("-fx-background-color: transparent;");
+
+        Label nameLabel = new Label(avatarName);
+        nameLabel.setStyle(
+                "-fx-background-color: white;" +
+                "-fx-text-fill: black;" +
+                "-fx-font-size: 14px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 8 20 8 20;" +
+                "-fx-background-radius: 22;"
+        );
+
+        VBox container = new VBox(12, imageBox, nameLabel);
+        container.setAlignment(Pos.CENTER);
+
+        AvatarCard card = new AvatarCard(avatarName, container, selectionBorder);
+
+        container.setOnMouseClicked(e -> selectCard(card));
+
+        return card;
+    }
+
+    private void selectCard(AvatarCard card) {
+        if (selectedCard != null) {
+            selectedCard.selectionBorder.setStroke(Color.TRANSPARENT);
+        }
+
+        selectedCard = card;
+        selectedCard.selectionBorder.setStroke(Color.web("#ffe600"));
+        statusLabel.setText("Seleccionado: " + selectedCard.avatarName);
+    }
+
+    private Image loadImage(String resourcePath) {
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                System.out.println("No se encontró la imagen: " + resourcePath);
+                return null;
+            }
+            return new Image(is);
+        } catch (Exception e) {
+            System.out.println("Error cargando imagen " + resourcePath + ": " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static class AvatarCard {
+        String avatarName;
+        VBox container;
+        Rectangle selectionBorder;
+
+        AvatarCard(String avatarName, VBox container, Rectangle selectionBorder) {
+            this.avatarName = avatarName;
+            this.container = container;
+            this.selectionBorder = selectionBorder;
+        }
     }
 }

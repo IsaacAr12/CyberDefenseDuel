@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import game.Config;
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -15,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 import java.io.InputStream;
@@ -29,11 +31,13 @@ public class GameScene {
 
     private double width = 1280;
     private double height = 720;
-    private final double[] laneX = new double[3];
+
+    private int laneCount;
+    private double[] laneX;
 
     private static final int MAX_ATTACKS = 256;
 
-    private int selectedLane = 1;
+    private int selectedLane;
     private int hp;
     private int score = 0;
     private int level = 0;
@@ -61,16 +65,24 @@ public class GameScene {
 
     private Label hpLabel;
     private Label scoreLabel;
-    private Label laneLabel;
     private Label levelLabel;
     private Label opponentLabel;
+    private Label mapLabel;
     private Label centerStatusLabel;
 
     private Image mapHabitacion;
     private Image mapOficina;
+    private Image mapCueva;
+
     private Image ddosImage;
     private Image malwareImage;
     private Image credImage;
+
+    private Image capitanPjImage;
+    private Image ninjaPjImage;
+    private Image piratePjImage;
+    private Image paladinPjImage;
+    private Image muncherPjImage;
 
     public GameScene(GUIManager guiManager, ClientController controller, String mapName) {
         this.guiManager = guiManager;
@@ -82,6 +94,10 @@ public class GameScene {
 
         this.hp = this.config.getInitialHp();
 
+        this.laneCount = resolveLaneCount(mapName);
+        this.laneX = new double[laneCount];
+        this.selectedLane = laneCount / 2;
+
         loadImages();
     }
 
@@ -89,35 +105,38 @@ public class GameScene {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #0f172a;");
 
-        hpLabel = new Label("HP: " + hp);
-        hpLabel.setStyle(GUIStyles.LABEL);
+        hpLabel = createHudLabel("HP: " + hp);
+        scoreLabel = createHudLabel("Score: 0");
+        levelLabel = createHudLabel("Nivel: 0");
+        mapLabel = createHudLabel("Mapa: " + mapName);
+        opponentLabel = createHudLabel("Rival HP: 100 | Rival Score: 0 | Rival Nivel: 0");
 
-        scoreLabel = new Label("Score: 0");
-        scoreLabel.setStyle(GUIStyles.LABEL);
-
-        laneLabel = new Label("Carril: 2");
-        laneLabel.setStyle(GUIStyles.LABEL);
-
-        levelLabel = new Label("Nivel: 0");
-        levelLabel.setStyle(GUIStyles.LABEL);
-
-        Label mapLabel = new Label("Mapa: " + mapName);
-        mapLabel.setStyle(GUIStyles.LABEL);
-
-        opponentLabel = new Label("Rival HP: 100 | Rival Score: 0 | Rival Nivel: 0");
-        opponentLabel.setStyle(GUIStyles.LABEL);
-
-        HBox top = new HBox(18, hpLabel, scoreLabel, laneLabel, levelLabel, mapLabel, opponentLabel);
+        HBox top = new HBox(14, hpLabel, scoreLabel, levelLabel, mapLabel, opponentLabel);
         top.setAlignment(Pos.CENTER);
-        top.setStyle("-fx-padding: 12;");
+        top.setPadding(new Insets(12));
+        top.setStyle(
+                "-fx-background-color: rgba(10,20,35,0.72);" +
+                "-fx-border-color: white;" +
+                "-fx-border-width: 0 0 2 0;"
+        );
         root.setTop(top);
 
-        Canvas canvas = new Canvas(width, height - 80);
+        Canvas canvas = new Canvas(width, height - 90);
 
         centerStatusLabel = new Label("");
-        centerStatusLabel.setStyle(GUIStyles.TITLE);
+        centerStatusLabel.setStyle(
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 30px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: rgba(166,74,201,0.92);" +
+                "-fx-padding: 18 34 18 34;" +
+                "-fx-background-radius: 18;"
+        );
+        centerStatusLabel.setVisible(false);
+        centerStatusLabel.setManaged(false);
 
-        VBoxCenterPane centerPane = new VBoxCenterPane(canvas, centerStatusLabel);
+        StackPane centerPane = new StackPane(canvas, centerStatusLabel);
+        StackPane.setAlignment(centerStatusLabel, Pos.CENTER);
         root.setCenter(centerPane);
 
         Scene scene = new Scene(root);
@@ -130,7 +149,7 @@ public class GameScene {
 
         scene.heightProperty().addListener((obs, oldVal, newVal) -> {
             height = newVal.doubleValue();
-            canvas.setHeight(height - 80);
+            canvas.setHeight(height - 90);
         });
 
         updateLanePositions();
@@ -142,10 +161,8 @@ public class GameScene {
 
             if (e.getCode() == KeyCode.LEFT) {
                 selectedLane = Math.max(0, selectedLane - 1);
-                laneLabel.setText("Carril: " + (selectedLane + 1));
             } else if (e.getCode() == KeyCode.RIGHT) {
-                selectedLane = Math.min(2, selectedLane + 1);
-                laneLabel.setText("Carril: " + (selectedLane + 1));
+                selectedLane = Math.min(laneCount - 1, selectedLane + 1);
             } else if (e.getCode() == KeyCode.Q) {
                 defend("DDOS");
             } else if (e.getCode() == KeyCode.W) {
@@ -177,6 +194,7 @@ public class GameScene {
                     if (hp <= 0) {
                         localGameOver = true;
                         centerStatusLabel.setText("Waiting for opponent...");
+                        centerStatusLabel.setVisible(true);
                         saveLocalFinalData();
                         controller.sendGameOver(hp, score, level, networkXp, malwareXp, cryptoXp);
                     }
@@ -198,12 +216,43 @@ public class GameScene {
         return scene;
     }
 
+    private Label createHudLabel(String text) {
+        Label label = new Label(text);
+        label.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.90);" +
+                "-fx-text-fill: #111111;" +
+                "-fx-font-size: 15px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-padding: 8 14 8 14;" +
+                "-fx-background-radius: 16;"
+        );
+        return label;
+    }
+
+    private int resolveLaneCount(String mapName) {
+        if ("Oficina de Trabajo".equalsIgnoreCase(mapName)) {
+            return 5;
+        }
+        if ("Cueva de Hacker".equalsIgnoreCase(mapName)) {
+            return 7;
+        }
+        return 3;
+    }
+
     private void loadImages() {
         mapHabitacion = loadImage("/images/Habitacion de Programador.png");
         mapOficina = loadImage("/images/Oficina de Trabajo.png");
+        mapCueva = loadImage("/images/Cueva de Hacker.png");
+
         ddosImage = loadImage("/images/DDOD.png");
         malwareImage = loadImage("/images/MALWARE.png");
         credImage = loadImage("/images/CRED.png");
+
+        capitanPjImage = loadImage("/images/personajes/Capitan_Firewall_pj.png");
+        ninjaPjImage = loadImage("/images/personajes/Byte_Ninja_marco_pj.png");
+        piratePjImage = loadImage("/images/personajes/Packet_Pirate_pj.png");
+        paladinPjImage = loadImage("/images/personajes/Null_Pointer_Paladin_pj.png");
+        muncherPjImage = loadImage("/images/personajes/Malware_Muncher_pj.png");
     }
 
     private Image loadImage(String resourcePath) {
@@ -220,9 +269,20 @@ public class GameScene {
     }
 
     private void updateLanePositions() {
-        laneX[0] = width * 0.23;
-        laneX[1] = width * 0.50;
-        laneX[2] = width * 0.77;
+        laneX = new double[laneCount];
+
+        double leftMargin = width * 0.12;
+        double rightMargin = width * 0.88;
+        double usableWidth = rightMargin - leftMargin;
+
+        if (laneCount == 1) {
+            laneX[0] = width / 2.0;
+            return;
+        }
+
+        for (int i = 0; i < laneCount; i++) {
+            laneX[i] = leftMargin + (usableWidth * i / (laneCount - 1));
+        }
     }
 
     private void saveLocalFinalData() {
@@ -259,7 +319,7 @@ public class GameScene {
             FallingAttack atk = attacks[i];
             atk.y += atk.speed * delta;
 
-            if (atk.y >= height - 120) {
+            if (atk.y >= height - 135) {
                 hp -= atk.damage;
                 removeAttackAt(i);
             } else {
@@ -273,7 +333,7 @@ public class GameScene {
 
         for (int i = 0; i < attackCount; i++) {
             FallingAttack atk = attacks[i];
-            if (atk.lane == selectedLane && atk.y >= height - 240 && atk.y <= height - 100) {
+            if (atk.lane == selectedLane && atk.y >= height - 260 && atk.y <= height - 110) {
                 targetIndex = i;
                 break;
             }
@@ -307,7 +367,7 @@ public class GameScene {
             return;
         }
 
-        int lane = random.nextInt(3);
+        int lane = random.nextInt(laneCount);
         int typeIndex = random.nextInt(3);
 
         String type;
@@ -349,23 +409,31 @@ public class GameScene {
 
         drawBackground(gc);
 
-        double playTop = 30;
-        double playBottom = height - 20;
+        double playTop = 22;
+        double playBottom = height - 18;
         double playHeight = playBottom - playTop;
 
-        double laneWidth = width * 0.16;
-        double laneHeight = playHeight - 30;
+        double laneWidth;
+        if (laneCount >= 7) {
+            laneWidth = width * 0.085;
+        } else if (laneCount >= 5) {
+            laneWidth = width * 0.11;
+        } else {
+            laneWidth = width * 0.16;
+        }
+
+        double laneHeight = playHeight - 36;
         double laneTop = playTop + 10;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < laneCount; i++) {
             double laneLeft = laneX[i] - laneWidth / 2.0;
 
-            gc.setFill(Color.rgb(20, 30, 50, 0.30));
+            gc.setFill(Color.rgb(20, 30, 50, 0.18));
             gc.fillRect(laneLeft, laneTop, laneWidth, laneHeight);
 
             if (i == selectedLane) {
                 gc.setStroke(Color.YELLOW);
-                gc.setLineWidth(5);
+                gc.setLineWidth(4);
             } else {
                 gc.setStroke(Color.WHITE);
                 gc.setLineWidth(2);
@@ -374,7 +442,7 @@ public class GameScene {
             gc.strokeRect(laneLeft, laneTop, laneWidth, laneHeight);
         }
 
-        drawPlayerTriangle(gc, laneTop, laneHeight);
+        drawPlayer(gc, laneTop, laneHeight);
         drawAttacks(gc);
     }
 
@@ -385,6 +453,8 @@ public class GameScene {
             bg = mapHabitacion;
         } else if ("Oficina de Trabajo".equalsIgnoreCase(mapName)) {
             bg = mapOficina;
+        } else if ("Cueva de Hacker".equalsIgnoreCase(mapName)) {
+            bg = mapCueva;
         }
 
         if (bg != null) {
@@ -394,27 +464,45 @@ public class GameScene {
             gc.fillRect(0, 0, width, height);
         }
 
-        gc.setFill(Color.rgb(5, 10, 20, 0.28));
+        gc.setFill(Color.rgb(5, 10, 20, 0.20));
         gc.fillRect(0, 0, width, height);
     }
 
-    private void drawPlayerTriangle(GraphicsContext gc, double laneTop, double laneHeight) {
+    private void drawPlayer(GraphicsContext gc, double laneTop, double laneHeight) {
         double px = laneX[selectedLane];
-        double py = laneTop + laneHeight - 70;
+        double py = laneTop + laneHeight - 90;
 
-        double[] triX = {px, px - 35, px + 35};
-        double[] triY = {py - 40, py + 25, py + 25};
+        Image playerImage = getSelectedPlayerImage();
+        if (playerImage != null) {
+            double size = Math.max(95, width * 0.075);
+            gc.drawImage(playerImage, px - size / 2.0, py - size / 2.0, size, size);
+        } else {
+            gc.setFill(Color.LIME);
+            gc.fillOval(px - 20, py - 20, 40, 40);
+        }
+    }
 
-        gc.setFill(Color.web("#4ade80"));
-        gc.fillPolygon(triX, triY, 3);
+    private Image getSelectedPlayerImage() {
+        String avatar = guiManager.getSetupData().getSelectedAvatar();
 
-        gc.setStroke(Color.WHITE);
-        gc.setLineWidth(2);
-        gc.strokePolygon(triX, triY, 3);
+        if (avatar == null) {
+            return null;
+        }
 
-        gc.setStroke(Color.web("#86efac"));
-        gc.setLineWidth(3);
-        gc.strokeLine(px - 45, py + 34, px + 45, py + 34);
+        switch (avatar) {
+            case "Capitan Firewall":
+                return capitanPjImage;
+            case "Byte Ninja":
+                return ninjaPjImage;
+            case "Packet Pirate":
+                return piratePjImage;
+            case "Null Pointer Paladin":
+                return paladinPjImage;
+            case "Malware Muncher":
+                return muncherPjImage;
+            default:
+                return null;
+        }
     }
 
     private void drawAttacks(GraphicsContext gc) {
@@ -422,7 +510,15 @@ public class GameScene {
             FallingAttack atk = attacks[i];
             Image img = getAttackImage(atk.type);
 
-            double size = Math.max(52, width * 0.045);
+            double size;
+            if (laneCount >= 7) {
+                size = Math.max(44, width * 0.032);
+            } else if (laneCount >= 5) {
+                size = Math.max(50, width * 0.038);
+            } else {
+                size = Math.max(58, width * 0.05);
+            }
+
             double x = laneX[atk.lane] - size / 2.0;
             double y = atk.y;
 
@@ -489,9 +585,7 @@ public class GameScene {
         } catch (Exception ignored) {
         }
 
-        if (!localGameOver) {
-            centerStatusLabel.setText("Waiting for opponent...");
-        }
+        // Solo el jugador que perdió ve el mensaje central.
     }
 
     private static class FallingAttack {
@@ -507,13 +601,6 @@ public class GameScene {
             this.damage = damage;
             this.speed = speed;
             this.y = 70;
-        }
-    }
-
-    private static class VBoxCenterPane extends javafx.scene.layout.VBox {
-        VBoxCenterPane(Canvas canvas, Label label) {
-            super(12, canvas, label);
-            setAlignment(Pos.CENTER);
         }
     }
 }
