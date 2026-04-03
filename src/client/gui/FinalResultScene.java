@@ -53,9 +53,9 @@ public class FinalResultScene {
         ));
         opponentSpec.setStyle(GUIStyles.LABEL);
 
-        Button backButton = new Button("Volver al Login");
+        Button backButton = new Button("Jugar otra vez");
         backButton.setStyle(GUIStyles.BUTTON);
-        backButton.setOnAction(e -> guiManager.showLoginScene());
+        backButton.setOnAction(e -> guiManager.showAvatarScene());
 
         VBox root = new VBox(
                 16,
@@ -71,7 +71,7 @@ public class FinalResultScene {
         root.setAlignment(Pos.CENTER);
         root.setStyle(GUIStyles.ROOT);
 
-        return new Scene(root, 900, 600);
+        return new Scene(root);
     }
 
     private String getSpecialization(int networkXp, int malwareXp, int cryptoXp) {

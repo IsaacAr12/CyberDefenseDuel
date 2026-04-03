@@ -23,9 +23,9 @@ public class GameScene {
     private final ClientController controller;
     private final String mapName;
 
-    private final double width = 900;
-    private final double height = 600;
-    private final double[] laneX = {200, 450, 700};
+    private double width = 1280;
+    private double height = 720;
+    private final double[] laneX = new double[3];
 
     private static final int MAX_ATTACKS = 256;
 
@@ -103,7 +103,20 @@ public class GameScene {
         VBoxCenterPane centerPane = new VBoxCenterPane(canvas, centerStatusLabel);
         root.setCenter(centerPane);
 
-        Scene scene = new Scene(root, width, height);
+        Scene scene = new Scene(root);
+
+        scene.widthProperty().addListener((obs, oldVal, newVal) -> {
+            width = newVal.doubleValue();
+            canvas.setWidth(width);
+            updateLanePositions();
+        });
+
+        scene.heightProperty().addListener((obs, oldVal, newVal) -> {
+            height = newVal.doubleValue();
+            canvas.setHeight(height - 80);
+        });
+
+        updateLanePositions();
 
         scene.setOnKeyPressed(e -> {
             if (localGameOver) {
@@ -164,6 +177,12 @@ public class GameScene {
         return scene;
     }
 
+    private void updateLanePositions() {
+        laneX[0] = width * 0.23;
+        laneX[1] = width * 0.50;
+        laneX[2] = width * 0.77;
+    }
+
     private void saveLocalFinalData() {
         PlayerSetupData data = guiManager.getSetupData();
         data.setFinalHp(hp);
@@ -178,7 +197,7 @@ public class GameScene {
         level = score / 100;
 
         spawnTimer += delta;
-        double spawnInterval = Math.max(0.25, 1.0 - (level * 0.05));
+        double spawnInterval = Math.max(0.35, 1.25 - (level * 0.06));
 
         if (spawnTimer >= spawnInterval) {
             spawnTimer = 0;
@@ -188,9 +207,9 @@ public class GameScene {
         int i = 0;
         while (i < attackCount) {
             FallingAttack atk = attacks[i];
-            atk.y += (atk.speed + level * 10) * delta;
+            atk.y += (atk.speed + level * 12) * delta;
 
-            if (atk.y >= height - 90) {
+            if (atk.y >= height - 120) {
                 hp -= atk.damage;
                 removeAttackAt(i);
             } else {
@@ -204,7 +223,7 @@ public class GameScene {
 
         for (int i = 0; i < attackCount; i++) {
             FallingAttack atk = attacks[i];
-            if (atk.lane == selectedLane && atk.y >= height - 170 && atk.y <= height - 70) {
+            if (atk.lane == selectedLane && atk.y >= height - 240 && atk.y <= height - 100) {
                 targetIndex = i;
                 break;
             }
@@ -255,7 +274,7 @@ public class GameScene {
             damage = 10;
         }
 
-        attacks[attackCount] = new FallingAttack(lane, type, damage, 160);
+        attacks[attackCount] = new FallingAttack(lane, type, damage, 170);
         attackCount++;
     }
 
@@ -276,12 +295,12 @@ public class GameScene {
         gc.setFill(Color.web("#08142b"));
         gc.fillRect(0, 0, width, height);
 
-        double playTop = 40;
-        double playBottom = height - 30;
+        double playTop = 30;
+        double playBottom = height - 20;
         double playHeight = playBottom - playTop;
 
-        double laneWidth = 150;
-        double laneHeight = playHeight - 40;
+        double laneWidth = width * 0.16;
+        double laneHeight = playHeight - 30;
         double laneTop = playTop + 10;
 
         if ("Habitacion de Programador".equalsIgnoreCase(mapName)) {
@@ -289,13 +308,13 @@ public class GameScene {
             gc.fillRect(0, 0, width, height);
 
             gc.setFill(Color.web("#1b263b"));
-            gc.fillRect(40, 20, width - 80, height - 40);
+            gc.fillRect(30, 15, width - 60, height - 30);
         } else {
             gc.setFill(Color.web("#10243f"));
             gc.fillRect(0, 0, width, height);
 
             gc.setFill(Color.web("#1f3b57"));
-            gc.fillRect(40, 20, width - 80, height - 40);
+            gc.fillRect(30, 15, width - 60, height - 30);
         }
 
         for (int i = 0; i < 3; i++) {
@@ -319,10 +338,10 @@ public class GameScene {
         }
 
         double px = laneX[selectedLane];
-        double py = laneTop + laneHeight - 55;
+        double py = laneTop + laneHeight - 70;
 
-        double[] triX = {px, px - 28, px + 28};
-        double[] triY = {py - 35, py + 20, py + 20};
+        double[] triX = {px, px - 35, px + 35};
+        double[] triY = {py - 40, py + 25, py + 25};
 
         gc.setFill(Color.web("#4ade80"));
         gc.fillPolygon(triX, triY, 3);
@@ -333,7 +352,7 @@ public class GameScene {
 
         gc.setStroke(Color.web("#86efac"));
         gc.setLineWidth(3);
-        gc.strokeLine(px - 38, py + 28, px + 38, py + 28);
+        gc.strokeLine(px - 45, py + 34, px + 45, py + 34);
 
         for (int i = 0; i < attackCount; i++) {
             FallingAttack atk = attacks[i];
@@ -346,9 +365,9 @@ public class GameScene {
                 gc.setFill(Color.CYAN);
             }
 
-            gc.fillOval(laneX[atk.lane] - 20, atk.y, 40, 40);
+            gc.fillOval(laneX[atk.lane] - 24, atk.y, 48, 48);
             gc.setFill(Color.WHITE);
-            gc.fillText(atk.type, laneX[atk.lane] - 22, atk.y - 5);
+            gc.fillText(atk.type, laneX[atk.lane] - 24, atk.y - 8);
         }
     }
 

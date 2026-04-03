@@ -2,7 +2,9 @@ package client.gui;
 
 import client.ClientController;
 import client.PlayerSetupData;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 public class GUIManager implements ClientController.GUIBridge {
@@ -19,6 +21,10 @@ public class GUIManager implements ClientController.GUIBridge {
         this.stage = stage;
         this.setupData = new PlayerSetupData();
         this.controller = new ClientController(this);
+
+        this.stage.setFullScreenExitHint("");
+        this.stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        this.stage.setMaximized(true);
     }
 
     public PlayerSetupData getSetupData() {
@@ -29,29 +35,35 @@ public class GUIManager implements ClientController.GUIBridge {
         return controller;
     }
 
+    private void applyScene(Scene scene) {
+        stage.setScene(scene);
+        stage.setMaximized(true);
+        stage.setFullScreen(true);
+    }
+
     public void showLoginScene() {
-        stage.setScene(new LoginScene(this, controller).createScene());
+        applyScene(new LoginScene(this, controller).createScene());
     }
 
     public void showAvatarScene() {
-        stage.setScene(new AvatarScene(this).createScene());
+        applyScene(new AvatarScene(this).createScene());
     }
 
     public void showMatchmakingScene() {
-        stage.setScene(new MatchmakingScene(this, controller).createScene());
+        applyScene(new MatchmakingScene(this, controller).createScene());
     }
 
     public void showMapScene() {
-        stage.setScene(new MapScene(this, controller).createScene());
+        applyScene(new MapScene(this, controller).createScene());
     }
 
     public void showGameScene(String mapName) {
         currentGameScene = new GameScene(this, controller, mapName);
-        stage.setScene(currentGameScene.createScene());
+        applyScene(currentGameScene.createScene());
     }
 
     public void showFinalResultScene() {
-        stage.setScene(new FinalResultScene(this).createScene());
+        applyScene(new FinalResultScene(this).createScene());
     }
 
     public void setLoginStatusLabel(Label loginStatusLabel) {

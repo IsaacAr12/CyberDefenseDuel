@@ -61,6 +61,6 @@ public class MapScene {
         root.setAlignment(Pos.CENTER);
         root.setStyle(GUIStyles.ROOT);
 
-        return new Scene(root, 900, 600);
+        return new Scene(root);
     }
 }
