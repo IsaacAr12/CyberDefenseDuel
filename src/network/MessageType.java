@@ -12,11 +12,10 @@ public enum MessageType {
     MAP_CHOICE,
     MAP_SELECTED,
 
+    CONFIG,
+
     GAME_STATE,
     GAME_OVER,
 
-    CONFIG,
-    PING,
-    PONG,
     ERROR
 }

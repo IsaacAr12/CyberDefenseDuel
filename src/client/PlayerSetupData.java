@@ -1,5 +1,7 @@
 package client;
 
+import game.Config;
+
 public class PlayerSetupData {
 
     private String username;
@@ -22,6 +24,12 @@ public class PlayerSetupData {
     private int opponentNetworkXp;
     private int opponentMalwareXp;
     private int opponentCryptoXp;
+
+    private Config gameConfig;
+
+    public PlayerSetupData() {
+        this.gameConfig = null;
+    }
 
     public String getUsername() {
         return username;
@@ -149,5 +157,13 @@ public class PlayerSetupData {
 
     public void setOpponentCryptoXp(int opponentCryptoXp) {
         this.opponentCryptoXp = opponentCryptoXp;
+    }
+
+    public Config getGameConfig() {
+        return gameConfig;
+    }
+
+    public void setGameConfig(Config gameConfig) {
+        this.gameConfig = gameConfig;
     }
 }

@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import game.Config;
 import network.Message;
 import network.MessageType;
 
@@ -60,6 +61,7 @@ public class ClientHandler extends Thread {
                 if (ok) {
                     this.username = creds.username;
                     sendMessage(new Message(MessageType.LOGIN_OK, "SERVER", ""));
+                    sendConfig();
                 } else {
                     sendMessage(new Message(MessageType.LOGIN_FAIL, "SERVER", ""));
                 }
@@ -73,6 +75,7 @@ public class ClientHandler extends Thread {
                 if (ok) {
                     this.username = creds.username;
                     sendMessage(new Message(MessageType.LOGIN_OK, "SERVER", ""));
+                    sendConfig();
                 } else {
                     sendMessage(new Message(MessageType.LOGIN_FAIL, "SERVER", ""));
                 }
@@ -110,6 +113,35 @@ public class ClientHandler extends Thread {
                 break;
             }
         }
+    }
+
+    private void sendConfig() {
+        Config config = buildDefaultConfig();
+        sendMessage(new Message(
+                MessageType.CONFIG,
+                "SERVER",
+                gson.toJson(config)
+        ));
+    }
+
+    private Config buildDefaultConfig() {
+        Config config = new Config();
+        config.setInitialHp(100);
+        config.setBaseSpawnRate(1.0);
+        config.setBaseAttackSpeed(160.0);
+        config.setScorePerKill(10);
+        config.setDifficultyStepScore(100);
+        config.setSpawnMultiplierPerLevel(1.15);
+        config.setSpeedAddPerLevel(20.0);
+
+        config.setDdosDamage(5);
+        config.setMalwareDamage(8);
+        config.setCredDamage(10);
+
+        config.setScreenWidth(1280);
+        config.setScreenHeight(720);
+
+        return config;
     }
 
     public void sendMessage(Message msg) {

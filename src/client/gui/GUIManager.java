@@ -2,6 +2,7 @@ package client.gui;
 
 import client.ClientController;
 import client.PlayerSetupData;
+import game.Config;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCombination;
@@ -110,6 +111,11 @@ public class GUIManager implements ClientController.GUIBridge {
     public void onMapSelected(String mapName) {
         setupData.setFinalMap(mapName);
         showGameScene(mapName);
+    }
+
+    @Override
+    public void onConfigReceived(Config config) {
+        setupData.setGameConfig(config);
     }
 
     @Override

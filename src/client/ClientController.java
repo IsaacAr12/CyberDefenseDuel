@@ -1,6 +1,7 @@
 package client;
 
 import com.google.gson.Gson;
+import game.Config;
 import javafx.application.Platform;
 import network.Message;
 import network.MessageType;
@@ -82,6 +83,10 @@ public class ClientController {
                 case LOGIN_FAIL -> guiBridge.onLoginFail();
                 case MATCH_FOUND -> guiBridge.onMatchFound();
                 case MAP_SELECTED -> guiBridge.onMapSelected(msg.getPayload());
+                case CONFIG -> {
+                    Config config = gson.fromJson(msg.getPayload(), Config.class);
+                    guiBridge.onConfigReceived(config);
+                }
                 case GAME_STATE -> guiBridge.onOpponentState(msg.getPayload());
                 case GAME_OVER -> guiBridge.onOpponentGameOver(msg.getPayload());
                 case ERROR -> {
@@ -103,6 +108,7 @@ public class ClientController {
         void showWaitingStatus();
         void onMatchFound();
         void onMapSelected(String mapName);
+        void onConfigReceived(Config config);
         void onOpponentState(String payload);
         void onOpponentGameOver(String payload);
         void onSessionFinished();

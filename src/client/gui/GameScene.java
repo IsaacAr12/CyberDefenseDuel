@@ -4,6 +4,7 @@ import client.ClientController;
 import client.PlayerSetupData;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import game.Config;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -22,6 +23,7 @@ public class GameScene {
     private final GUIManager guiManager;
     private final ClientController controller;
     private final String mapName;
+    private final Config config;
 
     private double width = 1280;
     private double height = 720;
@@ -30,7 +32,7 @@ public class GameScene {
     private static final int MAX_ATTACKS = 256;
 
     private int selectedLane = 1;
-    private int hp = 100;
+    private int hp;
     private int score = 0;
     private int level = 0;
 
@@ -66,13 +68,18 @@ public class GameScene {
         this.guiManager = guiManager;
         this.controller = controller;
         this.mapName = mapName;
+
+        Config receivedConfig = guiManager.getSetupData().getGameConfig();
+        this.config = (receivedConfig != null) ? receivedConfig : new Config();
+
+        this.hp = this.config.getInitialHp();
     }
 
     public Scene createScene() {
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #0f172a;");
 
-        hpLabel = new Label("HP: 100");
+        hpLabel = new Label("HP: " + hp);
         hpLabel.setStyle(GUIStyles.LABEL);
 
         scoreLabel = new Label("Score: 0");
@@ -194,10 +201,18 @@ public class GameScene {
     }
 
     private void update(double delta) {
-        level = score / 100;
+        if (config.getDifficultyStepScore() > 0) {
+            level = score / config.getDifficultyStepScore();
+        } else {
+            level = 0;
+        }
 
         spawnTimer += delta;
-        double spawnInterval = Math.max(0.35, 1.25 - (level * 0.06));
+
+        double spawnRate = config.getBaseSpawnRate() *
+                Math.pow(config.getSpawnMultiplierPerLevel(), level);
+
+        double spawnInterval = 1.0 / Math.max(0.1, spawnRate);
 
         if (spawnTimer >= spawnInterval) {
             spawnTimer = 0;
@@ -207,7 +222,7 @@ public class GameScene {
         int i = 0;
         while (i < attackCount) {
             FallingAttack atk = attacks[i];
-            atk.y += (atk.speed + level * 12) * delta;
+            atk.y += atk.speed * delta;
 
             if (atk.y >= height - 120) {
                 hp -= atk.damage;
@@ -236,14 +251,14 @@ public class GameScene {
         FallingAttack target = attacks[targetIndex];
 
         if (target.type.equals(expectedType)) {
-            score += 10;
+            score += config.getScorePerKill();
 
             if ("DDOS".equals(target.type)) {
-                networkXp += 10;
+                networkXp += config.getScorePerKill();
             } else if ("MALWARE".equals(target.type)) {
-                malwareXp += 10;
+                malwareXp += config.getScorePerKill();
             } else if ("CRED".equals(target.type)) {
-                cryptoXp += 10;
+                cryptoXp += config.getScorePerKill();
             }
         } else {
             hp -= target.damage;
@@ -265,16 +280,18 @@ public class GameScene {
 
         if (typeIndex == 0) {
             type = "DDOS";
-            damage = 5;
+            damage = config.getDdosDamage();
         } else if (typeIndex == 1) {
             type = "MALWARE";
-            damage = 8;
+            damage = config.getMalwareDamage();
         } else {
             type = "CRED";
-            damage = 10;
+            damage = config.getCredDamage();
         }
 
-        attacks[attackCount] = new FallingAttack(lane, type, damage, 170);
+        double speed = config.getBaseAttackSpeed() + (config.getSpeedAddPerLevel() * level);
+
+        attacks[attackCount] = new FallingAttack(lane, type, damage, speed);
         attackCount++;
     }
 
