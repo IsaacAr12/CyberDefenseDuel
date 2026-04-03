@@ -11,11 +11,13 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
+import java.io.InputStream;
 import java.util.Random;
 
 public class GameScene {
@@ -64,6 +66,12 @@ public class GameScene {
     private Label opponentLabel;
     private Label centerStatusLabel;
 
+    private Image mapHabitacion;
+    private Image mapOficina;
+    private Image ddosImage;
+    private Image malwareImage;
+    private Image credImage;
+
     public GameScene(GUIManager guiManager, ClientController controller, String mapName) {
         this.guiManager = guiManager;
         this.controller = controller;
@@ -73,6 +81,8 @@ public class GameScene {
         this.config = (receivedConfig != null) ? receivedConfig : new Config();
 
         this.hp = this.config.getInitialHp();
+
+        loadImages();
     }
 
     public Scene createScene() {
@@ -177,11 +187,36 @@ public class GameScene {
                 hpLabel.setText("HP: " + hp);
                 scoreLabel.setText("Score: " + score);
                 levelLabel.setText("Nivel: " + level);
-                opponentLabel.setText("Rival HP: " + opponentHp + " | Rival Score: " + opponentScore + " | Rival Nivel: " + opponentLevel);
+                opponentLabel.setText(
+                        "Rival HP: " + opponentHp +
+                        " | Rival Score: " + opponentScore +
+                        " | Rival Nivel: " + opponentLevel
+                );
             }
         }.start();
 
         return scene;
+    }
+
+    private void loadImages() {
+        mapHabitacion = loadImage("/images/Habitacion de Programador.png");
+        mapOficina = loadImage("/images/Oficina de Trabajo.png");
+        ddosImage = loadImage("/images/DDOD.png");
+        malwareImage = loadImage("/images/MALWARE.png");
+        credImage = loadImage("/images/CRED.png");
+    }
+
+    private Image loadImage(String resourcePath) {
+        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                System.out.println("No se encontró la imagen: " + resourcePath);
+                return null;
+            }
+            return new Image(is);
+        } catch (Exception e) {
+            System.out.println("Error cargando imagen " + resourcePath + ": " + e.getMessage());
+            return null;
+        }
     }
 
     private void updateLanePositions() {
@@ -312,6 +347,8 @@ public class GameScene {
         gc.setFill(Color.web("#08142b"));
         gc.fillRect(0, 0, width, height);
 
+        drawBackground(gc);
+
         double playTop = 30;
         double playBottom = height - 20;
         double playHeight = playBottom - playTop;
@@ -320,40 +357,48 @@ public class GameScene {
         double laneHeight = playHeight - 30;
         double laneTop = playTop + 10;
 
-        if ("Habitacion de Programador".equalsIgnoreCase(mapName)) {
-            gc.setFill(Color.web("#0d1b2a"));
-            gc.fillRect(0, 0, width, height);
-
-            gc.setFill(Color.web("#1b263b"));
-            gc.fillRect(30, 15, width - 60, height - 30);
-        } else {
-            gc.setFill(Color.web("#10243f"));
-            gc.fillRect(0, 0, width, height);
-
-            gc.setFill(Color.web("#1f3b57"));
-            gc.fillRect(30, 15, width - 60, height - 30);
-        }
-
         for (int i = 0; i < 3; i++) {
             double laneLeft = laneX[i] - laneWidth / 2.0;
 
-            if (i == selectedLane) {
-                gc.setFill(Color.web("#2c4f7a"));
-                gc.fillRect(laneLeft, laneTop, laneWidth, laneHeight);
+            gc.setFill(Color.rgb(20, 30, 50, 0.30));
+            gc.fillRect(laneLeft, laneTop, laneWidth, laneHeight);
 
+            if (i == selectedLane) {
                 gc.setStroke(Color.YELLOW);
                 gc.setLineWidth(5);
-                gc.strokeRect(laneLeft, laneTop, laneWidth, laneHeight);
             } else {
-                gc.setFill(Color.web("#31465f"));
-                gc.fillRect(laneLeft, laneTop, laneWidth, laneHeight);
-
                 gc.setStroke(Color.WHITE);
                 gc.setLineWidth(2);
-                gc.strokeRect(laneLeft, laneTop, laneWidth, laneHeight);
             }
+
+            gc.strokeRect(laneLeft, laneTop, laneWidth, laneHeight);
         }
 
+        drawPlayerTriangle(gc, laneTop, laneHeight);
+        drawAttacks(gc);
+    }
+
+    private void drawBackground(GraphicsContext gc) {
+        Image bg = null;
+
+        if ("Habitacion de Programador".equalsIgnoreCase(mapName)) {
+            bg = mapHabitacion;
+        } else if ("Oficina de Trabajo".equalsIgnoreCase(mapName)) {
+            bg = mapOficina;
+        }
+
+        if (bg != null) {
+            gc.drawImage(bg, 0, 0, width, height);
+        } else {
+            gc.setFill(Color.web("#10243f"));
+            gc.fillRect(0, 0, width, height);
+        }
+
+        gc.setFill(Color.rgb(5, 10, 20, 0.28));
+        gc.fillRect(0, 0, width, height);
+    }
+
+    private void drawPlayerTriangle(GraphicsContext gc, double laneTop, double laneHeight) {
         double px = laneX[selectedLane];
         double py = laneTop + laneHeight - 70;
 
@@ -370,22 +415,44 @@ public class GameScene {
         gc.setStroke(Color.web("#86efac"));
         gc.setLineWidth(3);
         gc.strokeLine(px - 45, py + 34, px + 45, py + 34);
+    }
 
+    private void drawAttacks(GraphicsContext gc) {
         for (int i = 0; i < attackCount; i++) {
             FallingAttack atk = attacks[i];
+            Image img = getAttackImage(atk.type);
 
-            if ("DDOS".equals(atk.type)) {
-                gc.setFill(Color.RED);
-            } else if ("MALWARE".equals(atk.type)) {
-                gc.setFill(Color.ORANGE);
+            double size = Math.max(52, width * 0.045);
+            double x = laneX[atk.lane] - size / 2.0;
+            double y = atk.y;
+
+            if (img != null) {
+                gc.drawImage(img, x, y, size, size);
             } else {
-                gc.setFill(Color.CYAN);
+                if ("DDOS".equals(atk.type)) {
+                    gc.setFill(Color.RED);
+                } else if ("MALWARE".equals(atk.type)) {
+                    gc.setFill(Color.ORANGE);
+                } else {
+                    gc.setFill(Color.CYAN);
+                }
+                gc.fillOval(x, y, size, size);
             }
 
-            gc.fillOval(laneX[atk.lane] - 24, atk.y, 48, 48);
             gc.setFill(Color.WHITE);
-            gc.fillText(atk.type, laneX[atk.lane] - 24, atk.y - 8);
+            gc.fillText(atk.type, x, y - 8);
         }
+    }
+
+    private Image getAttackImage(String type) {
+        if ("DDOS".equals(type)) {
+            return ddosImage;
+        } else if ("MALWARE".equals(type)) {
+            return malwareImage;
+        } else if ("CRED".equals(type)) {
+            return credImage;
+        }
+        return null;
     }
 
     public void updateOpponentState(String payload) {

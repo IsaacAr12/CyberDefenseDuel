@@ -22,6 +22,10 @@ for /r src %%f in (*.java) do (
 -d bin ^
 !sources!
 
+if exist resources\images (
+    xcopy /E /I /Y resources\images bin\images >nul
+)
+
 echo.
 echo Compilacion terminada
 pause
