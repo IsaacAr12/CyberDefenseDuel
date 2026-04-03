@@ -30,23 +30,19 @@ public class GUIManager implements ClientController.GUIBridge {
     }
 
     public void showLoginScene() {
-        LoginScene scene = new LoginScene(this, controller);
-        stage.setScene(scene.createScene());
+        stage.setScene(new LoginScene(this, controller).createScene());
     }
 
     public void showAvatarScene() {
-        AvatarScene scene = new AvatarScene(this);
-        stage.setScene(scene.createScene());
+        stage.setScene(new AvatarScene(this).createScene());
     }
 
     public void showMatchmakingScene() {
-        MatchmakingScene scene = new MatchmakingScene(this, controller);
-        stage.setScene(scene.createScene());
+        stage.setScene(new MatchmakingScene(this, controller).createScene());
     }
 
     public void showMapScene() {
-        MapScene scene = new MapScene(this, controller);
-        stage.setScene(scene.createScene());
+        stage.setScene(new MapScene(this, controller).createScene());
     }
 
     public void showGameScene(String mapName) {
@@ -55,8 +51,7 @@ public class GUIManager implements ClientController.GUIBridge {
     }
 
     public void showFinalResultScene() {
-        FinalResultScene scene = new FinalResultScene(this);
-        stage.setScene(scene.createScene());
+        stage.setScene(new FinalResultScene(this).createScene());
     }
 
     public void setLoginStatusLabel(Label loginStatusLabel) {

@@ -7,6 +7,22 @@ public class PlayerSetupData {
     private String selectedMap;
     private String finalMap;
 
+    private int finalScore;
+    private int finalLevel;
+    private int finalHp;
+
+    private int opponentFinalScore;
+    private int opponentFinalLevel;
+    private int opponentFinalHp;
+
+    private int networkXp;
+    private int malwareXp;
+    private int cryptoXp;
+
+    private int opponentNetworkXp;
+    private int opponentMalwareXp;
+    private int opponentCryptoXp;
+
     public String getUsername() {
         return username;
     }
@@ -37,5 +53,101 @@ public class PlayerSetupData {
 
     public void setFinalMap(String finalMap) {
         this.finalMap = finalMap;
+    }
+
+    public int getFinalScore() {
+        return finalScore;
+    }
+
+    public void setFinalScore(int finalScore) {
+        this.finalScore = finalScore;
+    }
+
+    public int getFinalLevel() {
+        return finalLevel;
+    }
+
+    public void setFinalLevel(int finalLevel) {
+        this.finalLevel = finalLevel;
+    }
+
+    public int getFinalHp() {
+        return finalHp;
+    }
+
+    public void setFinalHp(int finalHp) {
+        this.finalHp = finalHp;
+    }
+
+    public int getOpponentFinalScore() {
+        return opponentFinalScore;
+    }
+
+    public void setOpponentFinalScore(int opponentFinalScore) {
+        this.opponentFinalScore = opponentFinalScore;
+    }
+
+    public int getOpponentFinalLevel() {
+        return opponentFinalLevel;
+    }
+
+    public void setOpponentFinalLevel(int opponentFinalLevel) {
+        this.opponentFinalLevel = opponentFinalLevel;
+    }
+
+    public int getOpponentFinalHp() {
+        return opponentFinalHp;
+    }
+
+    public void setOpponentFinalHp(int opponentFinalHp) {
+        this.opponentFinalHp = opponentFinalHp;
+    }
+
+    public int getNetworkXp() {
+        return networkXp;
+    }
+
+    public void setNetworkXp(int networkXp) {
+        this.networkXp = networkXp;
+    }
+
+    public int getMalwareXp() {
+        return malwareXp;
+    }
+
+    public void setMalwareXp(int malwareXp) {
+        this.malwareXp = malwareXp;
+    }
+
+    public int getCryptoXp() {
+        return cryptoXp;
+    }
+
+    public void setCryptoXp(int cryptoXp) {
+        this.cryptoXp = cryptoXp;
+    }
+
+    public int getOpponentNetworkXp() {
+        return opponentNetworkXp;
+    }
+
+    public void setOpponentNetworkXp(int opponentNetworkXp) {
+        this.opponentNetworkXp = opponentNetworkXp;
+    }
+
+    public int getOpponentMalwareXp() {
+        return opponentMalwareXp;
+    }
+
+    public void setOpponentMalwareXp(int opponentMalwareXp) {
+        this.opponentMalwareXp = opponentMalwareXp;
+    }
+
+    public int getOpponentCryptoXp() {
+        return opponentCryptoXp;
+    }
+
+    public void setOpponentCryptoXp(int opponentCryptoXp) {
+        this.opponentCryptoXp = opponentCryptoXp;
     }
 }

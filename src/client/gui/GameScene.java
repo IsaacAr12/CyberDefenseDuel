@@ -1,6 +1,7 @@
 package client.gui;
 
 import client.ClientController;
+import client.PlayerSetupData;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import javafx.animation.AnimationTimer;
@@ -40,6 +41,10 @@ public class GameScene {
     private int networkXp = 0;
     private int malwareXp = 0;
     private int cryptoXp = 0;
+
+    private int opponentNetworkXp = 0;
+    private int opponentMalwareXp = 0;
+    private int opponentCryptoXp = 0;
 
     private final FallingAttack[] attacks = new FallingAttack[MAX_ATTACKS];
     private int attackCount = 0;
@@ -142,6 +147,7 @@ public class GameScene {
                     if (hp <= 0) {
                         localGameOver = true;
                         centerStatusLabel.setText("Waiting for opponent...");
+                        saveLocalFinalData();
                         controller.sendGameOver(hp, score, level, networkXp, malwareXp, cryptoXp);
                     }
                 }
@@ -156,6 +162,16 @@ public class GameScene {
         }.start();
 
         return scene;
+    }
+
+    private void saveLocalFinalData() {
+        PlayerSetupData data = guiManager.getSetupData();
+        data.setFinalHp(hp);
+        data.setFinalScore(score);
+        data.setFinalLevel(level);
+        data.setNetworkXp(networkXp);
+        data.setMalwareXp(malwareXp);
+        data.setCryptoXp(cryptoXp);
     }
 
     private void update(double delta) {
@@ -347,11 +363,31 @@ public class GameScene {
     }
 
     public void handleOpponentGameOver(String payload) {
-        opponentHp = 0;
         opponentGameOver = true;
 
+        try {
+            JsonObject obj = JsonParser.parseString(payload).getAsJsonObject();
+
+            opponentHp = obj.get("hp").getAsInt();
+            opponentScore = obj.get("score").getAsInt();
+            opponentLevel = obj.get("level").getAsInt();
+            opponentNetworkXp = obj.get("networkXp").getAsInt();
+            opponentMalwareXp = obj.get("malwareXp").getAsInt();
+            opponentCryptoXp = obj.get("cryptoXp").getAsInt();
+
+            PlayerSetupData data = guiManager.getSetupData();
+            data.setOpponentFinalHp(opponentHp);
+            data.setOpponentFinalScore(opponentScore);
+            data.setOpponentFinalLevel(opponentLevel);
+            data.setOpponentNetworkXp(opponentNetworkXp);
+            data.setOpponentMalwareXp(opponentMalwareXp);
+            data.setOpponentCryptoXp(opponentCryptoXp);
+
+        } catch (Exception ignored) {
+        }
+
         if (!localGameOver) {
-            centerStatusLabel.setText("You win!");
+            centerStatusLabel.setText("Waiting for opponent...");
         }
     }
 
