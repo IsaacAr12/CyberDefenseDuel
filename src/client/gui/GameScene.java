@@ -123,20 +123,23 @@ public class GameScene {
 
         Canvas canvas = new Canvas(width, height - 90);
 
-        centerStatusLabel = new Label("");
+        centerStatusLabel = new Label("Waiting for opponent...");
         centerStatusLabel.setStyle(
                 "-fx-text-fill: white;" +
-                "-fx-font-size: 30px;" +
+                "-fx-font-size: 32px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-background-color: rgba(166,74,201,0.92);" +
-                "-fx-padding: 18 34 18 34;" +
+                "-fx-background-color: rgba(166,74,201,0.94);" +
+                "-fx-padding: 18 36 18 36;" +
                 "-fx-background-radius: 18;"
         );
         centerStatusLabel.setVisible(false);
-        centerStatusLabel.setManaged(false);
+        centerStatusLabel.setMouseTransparent(true);
 
-        StackPane centerPane = new StackPane(canvas, centerStatusLabel);
+        StackPane centerPane = new StackPane();
+        centerPane.getChildren().addAll(canvas, centerStatusLabel);
+        StackPane.setAlignment(canvas, Pos.CENTER);
         StackPane.setAlignment(centerStatusLabel, Pos.CENTER);
+
         root.setCenter(centerPane);
 
         Scene scene = new Scene(root);
@@ -192,6 +195,7 @@ public class GameScene {
                     controller.sendGameState(hp, score, level);
 
                     if (hp <= 0) {
+                        hp = 0;
                         localGameOver = true;
                         centerStatusLabel.setText("Waiting for opponent...");
                         centerStatusLabel.setVisible(true);
@@ -321,6 +325,9 @@ public class GameScene {
 
             if (atk.y >= height - 135) {
                 hp -= atk.damage;
+                if (hp < 0) {
+                    hp = 0;
+                }
                 removeAttackAt(i);
             } else {
                 i++;
@@ -357,6 +364,9 @@ public class GameScene {
             }
         } else {
             hp -= target.damage;
+            if (hp < 0) {
+                hp = 0;
+            }
         }
 
         removeAttackAt(targetIndex);
@@ -584,8 +594,6 @@ public class GameScene {
 
         } catch (Exception ignored) {
         }
-
-        // Solo el jugador que perdió ve el mensaje central.
     }
 
     private static class FallingAttack {
