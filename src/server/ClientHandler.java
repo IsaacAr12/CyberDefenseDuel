@@ -82,6 +82,13 @@ public class ClientHandler extends Thread {
                 break;
             }
 
+            case AVATAR_SELECTED: {
+                if (username != null) {
+                    databaseManager.updateAvatar(username, msg.getPayload());
+                }
+                break;
+            }
+
             case MATCH_REQUEST: {
                 matchManager.requestMatch(this);
                 break;

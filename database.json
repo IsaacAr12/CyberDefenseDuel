@@ -4,20 +4,20 @@
     "password": "1234",
     "avatar": "Captain Firewall",
     "stats": {
-      "totalScore": 570,
-      "gamesPlayed": 12,
-      "networkXp": 330,
-      "malwareXp": 110,
-      "cryptoXp": 130
+      "totalScore": 730,
+      "gamesPlayed": 13,
+      "networkXp": 390,
+      "malwareXp": 140,
+      "cryptoXp": 200
     }
   },
   {
     "username": "Jeremias4130",
     "password": "4321",
-    "avatar": "Captain Firewall",
+    "avatar": "Byte Ninja",
     "stats": {
       "totalScore": 370,
-      "gamesPlayed": 10,
+      "gamesPlayed": 11,
       "networkXp": 90,
       "malwareXp": 170,
       "cryptoXp": 110

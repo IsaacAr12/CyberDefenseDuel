@@ -42,6 +42,14 @@ public class ClientController {
         ));
     }
 
+    public void sendAvatarSelection(String avatar) {
+        client.sendMessage(new Message(
+                MessageType.AVATAR_SELECTED,
+                "CLIENT",
+                avatar
+        ));
+    }
+
     public void requestMatch() {
         client.sendMessage(new Message(
                 MessageType.MATCH_REQUEST,

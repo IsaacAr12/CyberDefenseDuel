@@ -46,9 +46,14 @@ public class DatabaseManager {
             }
 
             for (int i = 0; i < users.length; i++) {
+                if (users[i] == null) {
+                    continue;
+                }
+
                 if (users[i].getStats() == null) {
                     users[i].setStats(new PlayerStats());
                 }
+
                 if (users[i].getAvatar() == null || users[i].getAvatar().isEmpty()) {
                     users[i].setAvatar("Captain Firewall");
                 }
@@ -69,15 +74,11 @@ public class DatabaseManager {
     }
 
     public synchronized boolean registerUser(String username, String password) {
-        return registerUser(username, password, "Captain Firewall");
-    }
-
-    public synchronized boolean registerUser(String username, String password, String avatar) {
         if (findUser(username) != null) {
             return false;
         }
 
-        User newUser = new User(username, password, avatar);
+        User newUser = new User(username, password, "Captain Firewall");
         addUser(newUser);
         saveDatabase();
         return true;
@@ -89,7 +90,8 @@ public class DatabaseManager {
     }
 
     public synchronized User findUser(String username) {
-        for (User user : users) {
+        for (int i = 0; i < users.length; i++) {
+            User user = users[i];
             if (user != null && user.getUsername().equals(username)) {
                 return user;
             }

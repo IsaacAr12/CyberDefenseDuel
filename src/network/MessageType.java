@@ -12,6 +12,8 @@ public enum MessageType {
     MAP_CHOICE,
     MAP_SELECTED,
 
+    AVATAR_SELECTED,
+
     CONFIG,
 
     GAME_STATE,

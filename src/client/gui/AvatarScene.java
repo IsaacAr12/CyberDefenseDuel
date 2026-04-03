@@ -27,25 +27,28 @@ public class AvatarScene {
         RadioButton avatar2 = new RadioButton("Byte Ninja");
         RadioButton avatar3 = new RadioButton("Malware Muncher");
         RadioButton avatar4 = new RadioButton("Crypto Llama");
+        RadioButton avatar5 = new RadioButton("Packet Pirate");
+        RadioButton avatar6 = new RadioButton("Null Pointer Paladin");
 
         avatar1.setStyle(GUIStyles.LABEL);
         avatar2.setStyle(GUIStyles.LABEL);
         avatar3.setStyle(GUIStyles.LABEL);
         avatar4.setStyle(GUIStyles.LABEL);
+        avatar5.setStyle(GUIStyles.LABEL);
+        avatar6.setStyle(GUIStyles.LABEL);
 
         avatar1.setToggleGroup(avatarGroup);
         avatar2.setToggleGroup(avatarGroup);
         avatar3.setToggleGroup(avatarGroup);
         avatar4.setToggleGroup(avatarGroup);
+        avatar5.setToggleGroup(avatarGroup);
+        avatar6.setToggleGroup(avatarGroup);
 
         Label statusLabel = new Label();
         statusLabel.setStyle(GUIStyles.ERROR);
 
         Button continueButton = new Button("Continuar");
         continueButton.setStyle(GUIStyles.BUTTON);
-
-        Button backButton = new Button("Volver");
-        backButton.setStyle(GUIStyles.BUTTON);
 
         continueButton.setOnAction(e -> {
             RadioButton selected = (RadioButton) avatarGroup.getSelectedToggle();
@@ -55,11 +58,11 @@ public class AvatarScene {
                 return;
             }
 
-            guiManager.getSetupData().setSelectedAvatar(selected.getText());
+            String avatar = selected.getText();
+            guiManager.getSetupData().setSelectedAvatar(avatar);
+            guiManager.getController().sendAvatarSelection(avatar);
             guiManager.showMatchmakingScene();
         });
-
-        backButton.setOnAction(e -> guiManager.showLoginScene());
 
         VBox root = new VBox(
                 12,
@@ -69,8 +72,9 @@ public class AvatarScene {
                 avatar2,
                 avatar3,
                 avatar4,
+                avatar5,
+                avatar6,
                 continueButton,
-                backButton,
                 statusLabel
         );
 
