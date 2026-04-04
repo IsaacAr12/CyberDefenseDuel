@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import model.PlayerStats;
 import model.User;
 
 import java.io.IOException;
@@ -13,100 +14,128 @@ import java.nio.file.Paths;
 
 public class DatabaseManager {
 
-    private static class Database {
-        private User[] users;
-
-        public Database() {
-            this.users = new User[0];
-        }
-
-        public User[] getUsers() {
-            return users;
-        }
-
-        public void setUsers(User[] users) {
-            this.users = users;
-        }
-    }
-
     private final Path dbPath;
     private final Gson gson;
+    private User[] users;
+
+    public DatabaseManager() {
+        this("database.json");
+    }
 
     public DatabaseManager(String filePath) {
         this.dbPath = Paths.get(filePath);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
-        initializeDatabase();
+        this.users = new User[0];
+        loadDatabase();
     }
 
-    private void initializeDatabase() {
+    private void loadDatabase() {
         try {
             if (!Files.exists(dbPath)) {
-                if (dbPath.getParent() != null) {
-                    Files.createDirectories(dbPath.getParent());
+                saveDatabase();
+                return;
+            }
+
+            try (Reader reader = Files.newBufferedReader(dbPath)) {
+                User[] loadedUsers = gson.fromJson(reader, User[].class);
+                if (loadedUsers != null) {
+                    users = loadedUsers;
+                } else {
+                    users = new User[0];
                 }
-                saveDatabase(new Database());
             }
+
+            for (int i = 0; i < users.length; i++) {
+                if (users[i] == null) {
+                    continue;
+                }
+
+                if (users[i].getStats() == null) {
+                    users[i].setStats(new PlayerStats());
+                }
+
+                if (users[i].getAvatar() == null || users[i].getAvatar().isEmpty()) {
+                    users[i].setAvatar("Captain Firewall");
+                }
+            }
+
         } catch (IOException e) {
-            System.out.println("Error inicializando database.json: " + e.getMessage());
+            users = new User[0];
+            System.out.println("No se pudo leer database.json: " + e.getMessage());
         }
     }
 
-    private Database loadDatabase() {
-        try (Reader reader = Files.newBufferedReader(dbPath)) {
-            Database db = gson.fromJson(reader, Database.class);
-            if (db == null || db.getUsers() == null) {
-                return new Database();
-            }
-            return db;
-        } catch (IOException e) {
-            System.out.println("Error leyendo database.json: " + e.getMessage());
-            return new Database();
-        }
-    }
-
-    private void saveDatabase(Database db) {
+    private void saveDatabase() {
         try (Writer writer = Files.newBufferedWriter(dbPath)) {
-            gson.toJson(db, writer);
+            gson.toJson(users, writer);
         } catch (IOException e) {
-            System.out.println("Error guardando database.json: " + e.getMessage());
+            System.out.println("No se pudo guardar database.json: " + e.getMessage());
         }
     }
 
     public synchronized boolean registerUser(String username, String password) {
-        Database db = loadDatabase();
-
-        for (User user : db.getUsers()) {
-            if (user.getUsername().equalsIgnoreCase(username)) {
-                return false;
-            }
+        if (findUser(username) != null) {
+            return false;
         }
 
-        User newUser = new User(username, password);
-
-        User[] oldUsers = db.getUsers();
-        User[] newUsers = new User[oldUsers.length + 1];
-
-        for (int i = 0; i < oldUsers.length; i++) {
-            newUsers[i] = oldUsers[i];
-        }
-
-        newUsers[oldUsers.length] = newUser;
-        db.setUsers(newUsers);
-        saveDatabase(db);
-
+        User newUser = new User(username, password, "Captain Firewall");
+        addUser(newUser);
+        saveDatabase();
         return true;
     }
 
     public synchronized boolean loginUser(String username, String password) {
-        Database db = loadDatabase();
+        User user = findUser(username);
+        return user != null && user.getPassword().equals(password);
+    }
 
-        for (User user : db.getUsers()) {
-            if (user.getUsername().equalsIgnoreCase(username)
-                    && user.getPasswordHash().equals(password)) {
-                return true;
+    public synchronized User findUser(String username) {
+        for (int i = 0; i < users.length; i++) {
+            User user = users[i];
+            if (user != null && user.getUsername().equals(username)) {
+                return user;
             }
         }
+        return null;
+    }
 
-        return false;
+    public synchronized boolean updateAvatar(String username, String avatar) {
+        User user = findUser(username);
+        if (user == null) {
+            return false;
+        }
+
+        user.setAvatar(avatar);
+        saveDatabase();
+        return true;
+    }
+
+    public synchronized void updateEndSessionStats(String username, int score, int networkXp, int malwareXp, int cryptoXp) {
+        User user = findUser(username);
+        if (user == null) {
+            return;
+        }
+
+        PlayerStats stats = user.getStats();
+        stats.addTotalScore(score);
+        stats.addGamePlayed();
+        stats.addNetworkXp(networkXp);
+        stats.addMalwareXp(malwareXp);
+        stats.addCryptoXp(cryptoXp);
+
+        saveDatabase();
+    }
+
+    public synchronized User[] getUsers() {
+        return users;
+    }
+
+    private void addUser(User user) {
+        User[] newUsers = new User[users.length + 1];
+        for (int i = 0; i < users.length; i++) {
+            newUsers[i] = users[i];
+        }
+        newUsers[users.length] = user;
+        users = newUsers;
     }
 }

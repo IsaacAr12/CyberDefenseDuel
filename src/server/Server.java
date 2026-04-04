@@ -12,25 +12,20 @@ public class Server {
 
     public Server(int port) {
         this.port = port;
-        this.databaseManager = new DatabaseManager("resources/database.json");
-        this.matchManager = new MatchManager();
+        this.databaseManager = new DatabaseManager();
+        this.matchManager = new MatchManager(databaseManager);
     }
 
     public void start() {
-        System.out.println("Iniciando servidor...");
-
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Servidor escuchando en el puerto " + port);
+            System.out.println("Servidor iniciado en el puerto " + port);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Cliente conectado desde: " + clientSocket.getInetAddress());
 
-                ClientHandler clientHandler =
-                        new ClientHandler(clientSocket, databaseManager, matchManager);
-
-                Thread clientThread = new Thread(clientHandler);
-                clientThread.start();
+                ClientHandler handler = new ClientHandler(clientSocket, databaseManager, matchManager);
+                handler.start();
             }
 
         } catch (IOException e) {
@@ -40,7 +35,17 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        Server server = new Server(5000);
+        int port = 5000;
+
+        if (args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                System.out.println("Puerto inválido. Se usará el puerto 5000.");
+            }
+        }
+
+        Server server = new Server(port);
         server.start();
     }
 }

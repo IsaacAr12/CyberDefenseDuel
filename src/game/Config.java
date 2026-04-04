@@ -1,89 +1,149 @@
 package game;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
- //Configuración central del juego con valores por defecto.
- //Ajusta los valores según el balance que necesites.
- 
 public class Config {
 
-    // Parámetros de spawn y velocidad
-    private double baseSpawnRate;              // segundos entre spawns en nivel 1
-    private double spawnMultiplierPerLevel;    // factor multiplicador por nivel
-    private double baseAttackSpeed;            // velocidad base de ataques
-    private double speedAddPerLevel;           // incremento de velocidad por nivel
-
-    // Jugador y progresión
     private int initialHp;
-    private int difficultyStepScore;           // puntos necesarios para subir de nivel
+    private double baseSpawnRate;
+    private double baseAttackSpeed;
     private int scorePerKill;
+    private int difficultyStepScore;
+    private double spawnMultiplierPerLevel;
+    private double speedAddPerLevel;
 
-    // Daño por tipo de ataque
-    private final Map<String, Integer> damageByType;
+    private int ddosDamage;
+    private int malwareDamage;
+    private int credDamage;
 
-    // Tamaño de pantalla ejemplo 
-    private int screenWidth;
-    private int screenHeight;
+    private double screenWidth;
+    private double screenHeight;
 
     public Config() {
-        // Valores por defecto razonables para pruebas
-        this.baseSpawnRate = 0.8;              // spawn cada 0.8s en nivel 1
-        this.spawnMultiplierPerLevel = 0.95;   // cada nivel reduce ligeramente el intervalo
-        this.baseAttackSpeed = 100.0;          // unidades/segundo (ajustar luego)
-        this.speedAddPerLevel = 10.0;          // incremento por nivel
-
         this.initialHp = 100;
-        this.difficultyStepScore = 50;
+        this.baseSpawnRate = 1.0;
+        this.baseAttackSpeed = 160.0;
         this.scorePerKill = 10;
+        this.difficultyStepScore = 100;
+        this.spawnMultiplierPerLevel = 1.15;
+        this.speedAddPerLevel = 20.0;
 
-        this.screenWidth = 800;
-        this.screenHeight = 2000;
+        this.ddosDamage = 5;
+        this.malwareDamage = 8;
+        this.credDamage = 10;
 
-        this.damageByType = new HashMap<>();
-        // Valores por defecto por tipo; puede modificarse
-        damageByType.put("DDOS", 5);
-        damageByType.put("MALWARE", 8);
-        damageByType.put("CRED", 10);
+        this.screenWidth = 1280;
+        this.screenHeight = 720;
     }
 
-    // Getters usados por el motor y factories
-    public double getBaseSpawnRate() { return baseSpawnRate; }
-    public double getSpawnMultiplierPerLevel() { return spawnMultiplierPerLevel; }
-    public double getBaseAttackSpeed() { return baseAttackSpeed; }
-    public double getSpeedAddPerLevel() { return speedAddPerLevel; }
+    public int getInitialHp() {
+        return initialHp;
+    }
 
-    public int getInitialHp() { return initialHp; }
-    public int getDifficultyStepScore() { return difficultyStepScore; }
-    public int getScorePerKill() { return scorePerKill; }
+    public void setInitialHp(int initialHp) {
+        this.initialHp = initialHp;
+    }
 
-    public Map<String, Integer> getDamageByType() { return damageByType; }
+    public double getBaseSpawnRate() {
+        return baseSpawnRate;
+    }
 
-    public int getScreenWidth() { return screenWidth; }
-    public int getScreenHeight() { return screenHeight; }
+    public void setBaseSpawnRate(double baseSpawnRate) {
+        this.baseSpawnRate = baseSpawnRate;
+    }
 
-    // Setters para ajustar dinámicamente en tests o balance
-    public void setBaseSpawnRate(double baseSpawnRate) { this.baseSpawnRate = baseSpawnRate; }
-    public void setSpawnMultiplierPerLevel(double spawnMultiplierPerLevel) { this.spawnMultiplierPerLevel = spawnMultiplierPerLevel; }
-    public void setBaseAttackSpeed(double baseAttackSpeed) { this.baseAttackSpeed = baseAttackSpeed; }
-    public void setSpeedAddPerLevel(double speedAddPerLevel) { this.speedAddPerLevel = speedAddPerLevel; }
+    public double getBaseAttackSpeed() {
+        return baseAttackSpeed;
+    }
 
-    public void setInitialHp(int initialHp) { this.initialHp = initialHp; }
-    public void setDifficultyStepScore(int difficultyStepScore) { this.difficultyStepScore = difficultyStepScore; }
-    public void setScorePerKill(int scorePerKill) { this.scorePerKill = scorePerKill; }
+    public void setBaseAttackSpeed(double baseAttackSpeed) {
+        this.baseAttackSpeed = baseAttackSpeed;
+    }
 
-    public void setScreenWidth(int screenWidth) { this.screenWidth = screenWidth; }
-    public void setScreenHeight(int screenHeight) { this.screenHeight = screenHeight; }
+    public int getScorePerKill() {
+        return scorePerKill;
+    }
 
-    // Utilidades para modificar daño por tipo
-    public void setDamageForType(String type, int damage) {
-        if (type == null) return;
-        damageByType.put(type.toUpperCase(), damage);
+    public void setScorePerKill(int scorePerKill) {
+        this.scorePerKill = scorePerKill;
+    }
+
+    public int getDifficultyStepScore() {
+        return difficultyStepScore;
+    }
+
+    public void setDifficultyStepScore(int difficultyStepScore) {
+        this.difficultyStepScore = difficultyStepScore;
+    }
+
+    public double getSpawnMultiplierPerLevel() {
+        return spawnMultiplierPerLevel;
+    }
+
+    public void setSpawnMultiplierPerLevel(double spawnMultiplierPerLevel) {
+        this.spawnMultiplierPerLevel = spawnMultiplierPerLevel;
+    }
+
+    public double getSpeedAddPerLevel() {
+        return speedAddPerLevel;
+    }
+
+    public void setSpeedAddPerLevel(double speedAddPerLevel) {
+        this.speedAddPerLevel = speedAddPerLevel;
+    }
+
+    public int getDdosDamage() {
+        return ddosDamage;
+    }
+
+    public void setDdosDamage(int ddosDamage) {
+        this.ddosDamage = ddosDamage;
+    }
+
+    public int getMalwareDamage() {
+        return malwareDamage;
+    }
+
+    public void setMalwareDamage(int malwareDamage) {
+        this.malwareDamage = malwareDamage;
+    }
+
+    public int getCredDamage() {
+        return credDamage;
+    }
+
+    public void setCredDamage(int credDamage) {
+        this.credDamage = credDamage;
+    }
+
+    public double getScreenWidth() {
+        return screenWidth;
+    }
+
+    public void setScreenWidth(double screenWidth) {
+        this.screenWidth = screenWidth;
+    }
+
+    public double getScreenHeight() {
+        return screenHeight;
+    }
+
+    public void setScreenHeight(double screenHeight) {
+        this.screenHeight = screenHeight;
     }
 
     public int getDamageForType(String type) {
-        if (type == null) return 0;
-        return damageByType.getOrDefault(type.toUpperCase(), 5);
+        if (type == null) {
+            return 0;
+        }
+
+        switch (type.toUpperCase()) {
+            case "DDOS":
+                return ddosDamage;
+            case "MALWARE":
+                return malwareDamage;
+            case "CRED":
+                return credDamage;
+            default:
+                return 0;
+        }
     }
 }

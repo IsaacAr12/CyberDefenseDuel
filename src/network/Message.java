@@ -1,23 +1,20 @@
 package network;
 
+import com.google.gson.Gson;
+
 public class Message {
+
     private MessageType type;
-    private String username;
-    private String password;
-    private String message;
+    private String senderId;
+    private String payload;
 
     public Message() {
     }
 
-    public Message(MessageType type, String message) {
+    public Message(MessageType type, String senderId, String payload) {
         this.type = type;
-        this.message = message;
-    }
-
-    public Message(MessageType type, String username, String password) {
-        this.type = type;
-        this.username = username;
-        this.password = password;
+        this.senderId = senderId;
+        this.payload = payload;
     }
 
     public MessageType getType() {
@@ -28,27 +25,27 @@ public class Message {
         this.type = type;
     }
 
-    public String getUsername() {
-        return username;
+    public String getSenderId() {
+        return senderId;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
-    public String getPasswordHash() {
-        return password;
+    public String getPayload() {
+        return payload;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPayload(String payload) {
+        this.payload = payload;
     }
 
-    public String getMessage() {
-        return message;
+    public String toJson() {
+        return new Gson().toJson(this);
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public static Message fromJson(String json) {
+        return new Gson().fromJson(json, Message.class);
     }
 }

@@ -15,18 +15,63 @@ public class PlayerStats {
         this.cryptoXp = 0;
     }
 
-    public int getTotalScore() { return totalScore; }
-    public void addTotalScore(int delta) { this.totalScore += delta; }
+    public int getTotalScore() {
+        return totalScore;
+    }
 
-    public int getGamesPlayed() { return gamesPlayed; }
-    public void incrementGamesPlayed() { this.gamesPlayed++; }
+    public void setTotalScore(int totalScore) {
+        this.totalScore = totalScore;
+    }
 
-    public int getNetworkXp() { return networkXp; }
-    public void addNetworkXp(int xp) { this.networkXp += xp; }
+    public int getGamesPlayed() {
+        return gamesPlayed;
+    }
 
-    public int getMalwareXp() { return malwareXp; }
-    public void addMalwareXp(int xp) { this.malwareXp += xp; }
+    public void setGamesPlayed(int gamesPlayed) {
+        this.gamesPlayed = gamesPlayed;
+    }
 
-    public int getCryptoXp() { return cryptoXp; }
-    public void addCryptoXp(int xp) { this.cryptoXp += xp; }
+    public int getNetworkXp() {
+        return networkXp;
+    }
+
+    public void setNetworkXp(int networkXp) {
+        this.networkXp = networkXp;
+    }
+
+    public int getMalwareXp() {
+        return malwareXp;
+    }
+
+    public void setMalwareXp(int malwareXp) {
+        this.malwareXp = malwareXp;
+    }
+
+    public int getCryptoXp() {
+        return cryptoXp;
+    }
+
+    public void setCryptoXp(int cryptoXp) {
+        this.cryptoXp = cryptoXp;
+    }
+
+    public void addTotalScore(int amount) {
+        this.totalScore += amount;
+    }
+
+    public void addGamePlayed() {
+        this.gamesPlayed++;
+    }
+
+    public void addNetworkXp(int amount) {
+        this.networkXp += amount;
+    }
+
+    public void addMalwareXp(int amount) {
+        this.malwareXp += amount;
+    }
+
+    public void addCryptoXp(int amount) {
+        this.cryptoXp += amount;
+    }
 }
