@@ -1,5 +1,6 @@
 package client.gui;
 
+import javafx.beans.binding.DoubleBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -7,10 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -44,11 +42,10 @@ public class AvatarScene {
         topPane.setPadding(new Insets(20, 0, 10, 0));
         root.setTop(topPane);
 
-        FlowPane cardsPane = new FlowPane();
-        cardsPane.setHgap(50);
-        cardsPane.setVgap(35);
-        cardsPane.setPadding(new Insets(20, 20, 20, 20));
-        cardsPane.setAlignment(Pos.TOP_CENTER);
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(40);
+        grid.setVgap(30);
 
         AvatarCard firewall = createCard("Capitan Firewall", "/images/personajes/Capitan Firewall marco.png");
         AvatarCard ninja = createCard("Byte Ninja", "/images/personajes/Byte Ninja marco.png");
@@ -56,15 +53,16 @@ public class AvatarScene {
         AvatarCard paladin = createCard("Null Pointer Paladin", "/images/personajes/Null Pointer Paladin marco.png");
         AvatarCard muncher = createCard("Malware Muncher", "/images/personajes/Malware Muncher marco.png");
 
-        cardsPane.getChildren().addAll(
-                firewall.container,
-                ninja.container,
-                pirate.container,
-                paladin.container,
-                muncher.container
-        );
+        // FILA 1
+        grid.add(firewall.container, 0, 0);
+        grid.add(ninja.container, 1, 0);
+        grid.add(pirate.container, 2, 0);
+        grid.add(paladin.container, 3, 0);
 
-        root.setCenter(cardsPane);
+        // FILA 2 (centro)
+        grid.add(muncher.container, 1, 1, 2, 1);
+
+        root.setCenter(grid);
 
         statusLabel = new Label("Jugador: " + guiManager.getSetupData().getUsername());
         statusLabel.setStyle(
@@ -79,7 +77,8 @@ public class AvatarScene {
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-padding: 10 22 10 22;"
+                "-fx-padding: 10 22 10 22;" +
+                "-fx-background-radius: 16;"
         );
 
         continueButton.setOnAction(e -> {
@@ -99,32 +98,34 @@ public class AvatarScene {
         bottomBox.setPadding(new Insets(10, 0, 20, 0));
         root.setBottom(bottomBox);
 
-        return new Scene(root);
+        Scene scene = new Scene(root);
+
+        // 🔥 ESCALADO AUTOMÁTICO
+        DoubleBinding sizeBinding = scene.widthProperty().divide(6);
+
+        firewall.bindSize(sizeBinding);
+        ninja.bindSize(sizeBinding);
+        pirate.bindSize(sizeBinding);
+        paladin.bindSize(sizeBinding);
+        muncher.bindSize(sizeBinding);
+
+        return scene;
     }
 
     private AvatarCard createCard(String avatarName, String imagePath) {
         Image image = loadImage(imagePath);
 
         ImageView imageView = new ImageView();
-        imageView.setFitWidth(265);
-        imageView.setFitHeight(265);
         imageView.setPreserveRatio(true);
 
-        if (image != null) {
-            imageView.setImage(image);
-        }
+        Rectangle border = new Rectangle();
+        border.setArcWidth(20);
+        border.setArcHeight(20);
+        border.setFill(Color.TRANSPARENT);
+        border.setStroke(Color.TRANSPARENT);
+        border.setStrokeWidth(5);
 
-        Rectangle selectionBorder = new Rectangle(280, 280);
-        selectionBorder.setArcWidth(18);
-        selectionBorder.setArcHeight(18);
-        selectionBorder.setFill(Color.TRANSPARENT);
-        selectionBorder.setStroke(Color.TRANSPARENT);
-        selectionBorder.setStrokeWidth(6);
-
-        StackPane imageBox = new StackPane(selectionBorder, imageView);
-        imageBox.setMinSize(280, 280);
-        imageBox.setMaxSize(280, 280);
-        imageBox.setStyle("-fx-background-color: transparent;");
+        StackPane imageBox = new StackPane(border, imageView);
 
         Label nameLabel = new Label(avatarName);
         nameLabel.setStyle(
@@ -132,39 +133,37 @@ public class AvatarScene {
                 "-fx-text-fill: black;" +
                 "-fx-font-size: 14px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-padding: 8 20 8 20;" +
-                "-fx-background-radius: 22;"
+                "-fx-padding: 8 18 8 18;" +
+                "-fx-background-radius: 20;"
         );
 
-        VBox container = new VBox(12, imageBox, nameLabel);
+        VBox container = new VBox(10, imageBox, nameLabel);
         container.setAlignment(Pos.CENTER);
 
-        AvatarCard card = new AvatarCard(avatarName, container, selectionBorder);
-
+        AvatarCard card = new AvatarCard(avatarName, container, imageView, border);
         container.setOnMouseClicked(e -> selectCard(card));
+
+        if (image != null) {
+            imageView.setImage(image);
+        }
 
         return card;
     }
 
     private void selectCard(AvatarCard card) {
         if (selectedCard != null) {
-            selectedCard.selectionBorder.setStroke(Color.TRANSPARENT);
+            selectedCard.border.setStroke(Color.TRANSPARENT);
         }
 
         selectedCard = card;
-        selectedCard.selectionBorder.setStroke(Color.web("#ffe600"));
+        selectedCard.border.setStroke(Color.YELLOW);
         statusLabel.setText("Seleccionado: " + selectedCard.avatarName);
     }
 
-    private Image loadImage(String resourcePath) {
-        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
-            if (is == null) {
-                System.out.println("No se encontró la imagen: " + resourcePath);
-                return null;
-            }
-            return new Image(is);
+    private Image loadImage(String path) {
+        try (InputStream is = getClass().getResourceAsStream(path)) {
+            return is != null ? new Image(is) : null;
         } catch (Exception e) {
-            System.out.println("Error cargando imagen " + resourcePath + ": " + e.getMessage());
             return null;
         }
     }
@@ -172,12 +171,22 @@ public class AvatarScene {
     private static class AvatarCard {
         String avatarName;
         VBox container;
-        Rectangle selectionBorder;
+        ImageView imageView;
+        Rectangle border;
 
-        AvatarCard(String avatarName, VBox container, Rectangle selectionBorder) {
+        AvatarCard(String avatarName, VBox container, ImageView imageView, Rectangle border) {
             this.avatarName = avatarName;
             this.container = container;
-            this.selectionBorder = selectionBorder;
+            this.imageView = imageView;
+            this.border = border;
+        }
+
+        void bindSize(DoubleBinding size) {
+            imageView.fitWidthProperty().bind(size);
+            imageView.fitHeightProperty().bind(size);
+
+            border.widthProperty().bind(size.add(10));
+            border.heightProperty().bind(size.add(10));
         }
     }
 }
