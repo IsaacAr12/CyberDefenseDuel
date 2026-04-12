@@ -1,13 +1,15 @@
 package client.gui;
 
 import client.ClientController;
+import client.audio.SoundManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
+import javafx.scene.layout.Region;
 
 public class MatchmakingScene {
 
@@ -20,15 +22,17 @@ public class MatchmakingScene {
     }
 
     public Scene createScene() {
+        SoundManager.playMusic("/sounds/MENU.mp3", 0.45);
+
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: #14a3dc;");
+        setBackgroundImage(root, "/images/Busqueda.png");
 
         Label title = new Label("BUSCAR PARTIDA");
         title.setStyle(
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 26px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-background-color: #a64ac9;" +
+                "-fx-background-color: rgba(166,74,201,0.92);" +
                 "-fx-padding: 12 28 12 28;"
         );
 
@@ -41,21 +45,30 @@ public class MatchmakingScene {
         usernameLabel.setStyle(
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 20px;" +
-                "-fx-font-weight: bold;"
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: rgba(0,0,0,0.35);" +
+                "-fx-padding: 8 16 8 16;" +
+                "-fx-background-radius: 14;"
         );
 
         Label avatarLabel = new Label("Avatar: " + guiManager.getSetupData().getSelectedAvatar());
         avatarLabel.setStyle(
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 20px;" +
-                "-fx-font-weight: bold;"
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: rgba(0,0,0,0.35);" +
+                "-fx-padding: 8 16 8 16;" +
+                "-fx-background-radius: 14;"
         );
 
         Label status = new Label("Presiona buscar para entrar a la cola.");
         status.setStyle(
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 18px;" +
-                "-fx-font-weight: bold;"
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: rgba(0,0,0,0.35);" +
+                "-fx-padding: 8 16 8 16;" +
+                "-fx-background-radius: 14;"
         );
 
         Button searchButton = createPurpleButton("BUSCAR PARTIDA");
@@ -85,10 +98,38 @@ public class MatchmakingScene {
         return new Scene(root);
     }
 
+    private void setBackgroundImage(Region region, String resourcePath) {
+        try {
+            var url = getClass().getResource(resourcePath);
+            if (url == null) {
+                region.setStyle("-fx-background-color: black;");
+                return;
+            }
+
+            BackgroundSize size = new BackgroundSize(
+                    100, 100,
+                    true, true,
+                    true, true
+            );
+
+            BackgroundImage bg = new BackgroundImage(
+                    new Image(url.toExternalForm()),
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundPosition.CENTER,
+                    size
+            );
+
+            region.setBackground(new Background(bg));
+        } catch (Exception e) {
+            region.setStyle("-fx-background-color: black;");
+        }
+    }
+
     private Button createPurpleButton(String text) {
         Button button = new Button(text);
         button.setStyle(
-                "-fx-background-color: #a64ac9;" +
+                "-fx-background-color: rgba(166,74,201,0.95);" +
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +

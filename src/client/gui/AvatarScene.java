@@ -30,14 +30,14 @@ public class AvatarScene {
         SoundManager.playMusic("/sounds/MENU.mp3", 0.45);
 
         BorderPane root = new BorderPane();
-        root.setStyle("-fx-background-color: #14a3dc;");
+        setBackgroundImage(root, "/images/Avatares.png");
 
         Label title = new Label("SELECCIONA A TU PERSONAJE");
         title.setStyle(
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 26px;" +
                 "-fx-font-weight: bold;" +
-                "-fx-background-color: #a64ac9;" +
+                "-fx-background-color: rgba(166,74,201,0.92);" +
                 "-fx-padding: 12 24 12 24;"
         );
 
@@ -68,12 +68,15 @@ public class AvatarScene {
         statusLabel.setStyle(
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 18px;" +
-                "-fx-font-weight: bold;"
+                "-fx-font-weight: bold;" +
+                "-fx-background-color: rgba(0,0,0,0.35);" +
+                "-fx-padding: 8 16 8 16;" +
+                "-fx-background-radius: 14;"
         );
 
         Button continueButton = new Button("CONTINUAR");
         continueButton.setStyle(
-                "-fx-background-color: #a64ac9;" +
+                "-fx-background-color: rgba(166,74,201,0.95);" +
                 "-fx-text-fill: white;" +
                 "-fx-font-size: 16px;" +
                 "-fx-font-weight: bold;" +
@@ -101,7 +104,6 @@ public class AvatarScene {
         Scene scene = new Scene(root);
 
         DoubleBinding sizeBinding = scene.widthProperty().divide(6.0);
-
         firewall.bindSize(sizeBinding);
         ninja.bindSize(sizeBinding);
         pirate.bindSize(sizeBinding);
@@ -109,6 +111,34 @@ public class AvatarScene {
         muncher.bindSize(sizeBinding);
 
         return scene;
+    }
+
+    private void setBackgroundImage(Region region, String resourcePath) {
+        try {
+            var url = getClass().getResource(resourcePath);
+            if (url == null) {
+                region.setStyle("-fx-background-color: black;");
+                return;
+            }
+
+            BackgroundSize size = new BackgroundSize(
+                    100, 100,
+                    true, true,
+                    true, true
+            );
+
+            BackgroundImage bg = new BackgroundImage(
+                    new Image(url.toExternalForm()),
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundPosition.CENTER,
+                    size
+            );
+
+            region.setBackground(new Background(bg));
+        } catch (Exception e) {
+            region.setStyle("-fx-background-color: black;");
+        }
     }
 
     private AvatarCard createCard(String avatarName, String imagePath) {
@@ -183,7 +213,6 @@ public class AvatarScene {
         void bindSize(DoubleBinding size) {
             imageView.fitWidthProperty().bind(size);
             imageView.fitHeightProperty().bind(size);
-
             border.widthProperty().bind(size.add(10));
             border.heightProperty().bind(size.add(10));
         }
