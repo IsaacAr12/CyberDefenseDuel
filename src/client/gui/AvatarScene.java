@@ -1,5 +1,6 @@
 package client.gui;
 
+import client.audio.SoundManager;
 import javafx.beans.binding.DoubleBinding;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,6 +27,8 @@ public class AvatarScene {
     }
 
     public Scene createScene() {
+        SoundManager.playMusic("/sounds/MENU.mp3", 0.45);
+
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #14a3dc;");
 
@@ -53,13 +56,10 @@ public class AvatarScene {
         AvatarCard paladin = createCard("Null Pointer Paladin", "/images/personajes/Null Pointer Paladin marco.png");
         AvatarCard muncher = createCard("Malware Muncher", "/images/personajes/Malware Muncher marco.png");
 
-        // FILA 1
         grid.add(firewall.container, 0, 0);
         grid.add(ninja.container, 1, 0);
         grid.add(pirate.container, 2, 0);
         grid.add(paladin.container, 3, 0);
-
-        // FILA 2 (centro)
         grid.add(muncher.container, 1, 1, 2, 1);
 
         root.setCenter(grid);
@@ -100,8 +100,7 @@ public class AvatarScene {
 
         Scene scene = new Scene(root);
 
-        // 🔥 ESCALADO AUTOMÁTICO
-        DoubleBinding sizeBinding = scene.widthProperty().divide(6);
+        DoubleBinding sizeBinding = scene.widthProperty().divide(6.0);
 
         firewall.bindSize(sizeBinding);
         ninja.bindSize(sizeBinding);

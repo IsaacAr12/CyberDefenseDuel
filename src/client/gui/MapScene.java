@@ -1,6 +1,7 @@
 package client.gui;
 
 import client.ClientController;
+import client.audio.SoundManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -31,6 +32,8 @@ public class MapScene {
     }
 
     public Scene createScene() {
+        SoundManager.playMusic("/sounds/MENU.mp3", 0.45);
+
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #14a3dc;");
 

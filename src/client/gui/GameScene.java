@@ -2,6 +2,7 @@ package client.gui;
 
 import client.ClientController;
 import client.PlayerSetupData;
+import client.audio.SoundManager;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import game.Config;
@@ -17,6 +18,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 
 import java.io.InputStream;
@@ -84,6 +86,9 @@ public class GameScene {
     private Image paladinPjImage;
     private Image muncherPjImage;
 
+    private AudioClip hitSound;
+    private AudioClip blockSound;
+
     public GameScene(GUIManager guiManager, ClientController controller, String mapName) {
         this.guiManager = guiManager;
         this.controller = controller;
@@ -99,9 +104,12 @@ public class GameScene {
         this.selectedLane = laneCount / 2;
 
         loadImages();
+        loadSounds();
     }
 
     public Scene createScene() {
+        playMapMusic();
+
         BorderPane root = new BorderPane();
         root.setStyle("-fx-background-color: #0f172a;");
 
@@ -220,6 +228,21 @@ public class GameScene {
         return scene;
     }
 
+    private void loadSounds() {
+        hitSound = SoundManager.loadClip("/sounds/HIT.wav");
+        blockSound = SoundManager.loadClip("/sounds/Q-W-E.wav");
+    }
+
+    private void playMapMusic() {
+        if ("Habitacion de Programador".equalsIgnoreCase(mapName)) {
+            SoundManager.playMusic("/sounds/Habitacion-de-Programador.mp3", 0.45);
+        } else if ("Oficina de Trabajo".equalsIgnoreCase(mapName)) {
+            SoundManager.playMusic("/sounds/Oficina-de-Trabajo.mp3", 0.45);
+        } else if ("Cueva de Hacker".equalsIgnoreCase(mapName)) {
+            SoundManager.playMusic("/sounds/Cueva-de-Hacker.mp3", 0.45);
+        }
+    }
+
     private Label createHudLabel(String text) {
         Label label = new Label(text);
         label.setStyle(
@@ -328,6 +351,7 @@ public class GameScene {
                 if (hp < 0) {
                     hp = 0;
                 }
+                SoundManager.playClip(hitSound);
                 removeAttackAt(i);
             } else {
                 i++;
@@ -362,11 +386,14 @@ public class GameScene {
             } else if ("CRED".equals(target.type)) {
                 cryptoXp += config.getScorePerKill();
             }
+
+            SoundManager.playClip(blockSound);
         } else {
             hp -= target.damage;
             if (hp < 0) {
                 hp = 0;
             }
+            SoundManager.playClip(hitSound);
         }
 
         removeAttackAt(targetIndex);
